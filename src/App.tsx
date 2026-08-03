@@ -170,6 +170,8 @@ export default function App() {
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      // Don't carry a "Viewing saved chart" label across a login change.
+      if (!session) setOpenedName('')
     })
     return () => sub.subscription.unsubscribe()
   }, [])

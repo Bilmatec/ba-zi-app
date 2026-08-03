@@ -7,7 +7,8 @@ Built as a graduation project, developed with Claude Code.
 ## Status
 
 - **Phase 1 (done):** birth-detail input form and Four Pillars chart calculation, verified against known-correct references.
-- Planned: accounts and saved charts, summarized interpretation, Luck Pillars timeline.
+- **Phase 2 (done):** accounts (Supabase auth) and per-user saved charts, protected by row level security. Verified end-to-end: sign up → save → log out → log back in → reopen, plus cross-user isolation.
+- Planned: summarized interpretation, Luck Pillars timeline.
 
 ## Calculation conventions
 
