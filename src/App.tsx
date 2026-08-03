@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { calculateChart, type ChartResult, type Pillar } from './lib/bazi/calculate'
+import type { User } from '@supabase/supabase-js'
+import {
+  calculateChart,
+  type BirthInput,
+  type ChartResult,
+  type Pillar,
+} from './lib/bazi/calculate'
 import { searchPlaces, placeLabel, type PlaceResult } from './lib/geo'
+import { supabase } from './lib/supabase'
+import { saveChart, type SavedChartRow } from './lib/charts-store'
+import AuthPanel from './components/AuthPanel'
+import SavedCharts from './components/SavedCharts'
 import './App.css'
+
+type SavableInput = BirthInput & { placeLabel: string }
 
 function PillarCard({ label, pillar }: { label: string; pillar: Pillar | null }) {
   if (!pillar) {
@@ -89,6 +101,49 @@ function ChartView({ chart }: { chart: ChartResult }) {
   )
 }
 
+function SaveChartBox({
+  input,
+  onSaved,
+}: {
+  input: SavableInput
+  onSaved: () => void
+}) {
+  const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setMessage('')
+    try {
+      await saveChart(name.trim() || 'Untitled chart', input)
+      setMessage('Saved!')
+      setName('')
+      onSaved()
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Could not save the chart.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form className="save-box" onSubmit={submit}>
+      <input
+        type="text"
+        placeholder="Name this chart (e.g. Mine, Mum, 1990 test)"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <button type="submit" className="submit" disabled={busy}>
+        {busy ? 'Saving…' : 'Save this chart'}
+      </button>
+      {message && <span className="auth-note">{message}</span>}
+    </form>
+  )
+}
+
 export default function App() {
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -102,7 +157,22 @@ export default function App() {
   const searchTimer = useRef<number | undefined>(undefined)
 
   const [chart, setChart] = useState<ChartResult | null>(null)
+  const [lastInput, setLastInput] = useState<SavableInput | null>(null)
+  const [openedName, setOpenedName] = useState('')
   const [error, setError] = useState('')
+
+  const [user, setUser] = useState<User | null>(null)
+  const [savedRefresh, setSavedRefresh] = useState(0)
+
+  // Track login state.
+  useEffect(() => {
+    if (!supabase) return
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
   // Debounced city search: wait until typing pauses, then query.
   useEffect(() => {
@@ -131,6 +201,18 @@ export default function App() {
     setPlaceResults([])
   }
 
+  function runCalculation(input: SavableInput, sourceName = '') {
+    try {
+      setChart(calculateChart(input))
+      setLastInput(input)
+      setOpenedName(sourceName)
+      setError('')
+    } catch (err) {
+      setChart(null)
+      setError(err instanceof Error ? err.message : 'Something went wrong calculating the chart.')
+    }
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -146,26 +228,29 @@ export default function App() {
     const [y, m, d] = date.split('-').map(Number)
     const [hh, mm] = timeUnknown ? [undefined, undefined] : time.split(':').map(Number)
 
-    try {
-      setChart(
-        calculateChart({
-          year: y,
-          month: m,
-          day: d,
-          hour: hh,
-          minute: mm,
-          timeZone: place.timezone,
-          gender,
-        }),
-      )
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong calculating the chart.')
-    }
+    runCalculation({
+      year: y,
+      month: m,
+      day: d,
+      hour: hh,
+      minute: mm,
+      timeZone: place.timezone,
+      gender,
+      placeLabel: placeLabel(place),
+    })
+  }
+
+  function openSaved(row: SavedChartRow) {
+    runCalculation(row.input, row.chart_name)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <main className="app">
-      <h1>Ba Zi — Four Pillars Chart</h1>
+      <header className="app-header">
+        <h1>Ba Zi — Four Pillars Chart</h1>
+        <AuthPanel user={user} />
+      </header>
       <p className="tagline">
         Enter your birth details to calculate your Four Pillars of Destiny chart.
       </p>
@@ -245,7 +330,20 @@ export default function App() {
         {error && <div className="error">{error}</div>}
       </form>
 
+      {chart && openedName && (
+        <div className="opened-banner">
+          Viewing saved chart: <strong>{openedName}</strong>
+        </div>
+      )}
       {chart && <ChartView chart={chart} />}
+      {chart && lastInput && user && (
+        <SaveChartBox input={lastInput} onSaved={() => setSavedRefresh((n) => n + 1)} />
+      )}
+      {chart && !user && supabase && (
+        <p className="auth-note">Log in above to save this chart to your account.</p>
+      )}
+
+      {user && <SavedCharts refreshKey={savedRefresh} onOpen={openSaved} />}
     </main>
   )
 }
