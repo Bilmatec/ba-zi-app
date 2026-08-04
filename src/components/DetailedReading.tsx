@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline } from '../lib/bazi/luck'
-import { detailedReading, HIDDEN_STEMS } from '../lib/bazi/detail'
+import { detailedReading, tenGodOf, HIDDEN_STEMS } from '../lib/bazi/detail'
 import { interpretChart, roleOf, ELEMENTS } from '../lib/bazi/interpret'
 import { STEMS, type Element } from '../lib/bazi/data'
 import { isUnlocked, unlockDetailed } from '../lib/unlock'
@@ -145,8 +145,10 @@ export default function DetailedReading({
       <h3>The Ten Gods: who everyone is to you</h3>
       <p>
         Each character in your chart plays one of ten classical roles relative to your day master
-        — the Ten Gods. The visible stems set the stage; the main hidden stem of each branch works
-        underneath.
+        — the Ten Gods. Ten roles exist; your chart casts only some of them, and repetition is
+        part of the reading. These roles come from your birth chart, so they are lifelong — they
+        do not change as the decades turn. The visible stems set the stage; the main hidden stem
+        of each branch works underneath.
       </p>
       <ul className="tengod-list">
         {detail.tenGods.map((t, i) => (
@@ -180,6 +182,7 @@ export default function DetailedReading({
           <h3>Your current decade, in depth</h3>
           <p>
             {`Your ${current.stem.pinyin} ${current.branch.pinyin} pillar (${current.startYear}–${current.endYear}) breaks down like this: the visible stem ${current.stem.chinese} is ${lower(current.stem.element)}, your ${roleLabel(roleOf(dm.element, current.stem.element))}; the branch ${current.branch.chinese} carries ${lower(current.branch.element)} on the surface, and hides ${hiddenListFor(current.branch.chinese)} underneath. `}
+            {`The decade also takes a seat in your cast: its stem plays ${tenGodOf(dm, current.stem).english} (${tenGodOf(dm, current.stem).chinese}) and its branch's main qi plays ${tenGodOf(dm, STEMS[HIDDEN_STEMS[current.branch.chinese][0]]).english} (${tenGodOf(dm, STEMS[HIDDEN_STEMS[current.branch.chinese][0]]).chinese}) — guest roles that sit alongside the lifelong ones above for these ten years, reinforcing them where they repeat and adding what your birth chart lacks where they don't. `}
             {current.guiRen
               ? `Gui ren also sits in this branch — in these years, the helpful-people signal is not an abstraction; it names the decade you are in.`
               : `The decade carries no gui ren marker, so its gifts route through your own effort more than through patrons.`}
