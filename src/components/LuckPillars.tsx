@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline, LuckPeriod } from '../lib/bazi/luck'
 import { interpretChart, roleOf, type Strength, type ElementRole } from '../lib/bazi/interpret'
@@ -137,10 +137,22 @@ export default function LuckPillars({
   const strength = interpretChart(chart).strength
   const defaultIndex = luck.currentIndex >= 0 ? luck.currentIndex : 0
   const [selected, setSelected] = useState(defaultIndex)
+  const stripRef = useRef<HTMLDivElement>(null)
 
   // A new calculation replaces the timeline — snap back to its own "now".
   useEffect(() => {
     setSelected(defaultIndex)
+  }, [luck, defaultIndex])
+
+  // On small screens the strip scrolls sideways; center the current pillar so
+  // "Now" is visible without hunting for it.
+  useEffect(() => {
+    const strip = stripRef.current
+    if (!strip) return
+    const target = strip.children[defaultIndex] as HTMLElement | undefined
+    if (!target) return
+    const delta = target.getBoundingClientRect().left - strip.getBoundingClientRect().left
+    strip.scrollLeft += delta - (strip.clientWidth - target.clientWidth) / 2
   }, [luck, defaultIndex])
 
   const p = luck.periods[selected]
@@ -166,7 +178,7 @@ export default function LuckPillars({
         </p>
       )}
 
-      <div className="luck-strip" role="tablist" aria-label="Luck pillar decades">
+      <div className="luck-strip" role="tablist" aria-label="Luck pillar decades" ref={stripRef}>
         {luck.periods.map((period, i) => (
           <button
             type="button"
