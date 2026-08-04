@@ -11,7 +11,9 @@ Built as a graduation project, developed with Claude Code. Deployed on Vercel (a
 - **Phase 1 (done):** birth-detail input form and Four Pillars chart calculation, verified against known-correct references.
 - **Phase 2 (done):** accounts (Supabase auth) and per-user saved charts, protected by row level security. Verified end-to-end: sign up → save → log out → log back in → reopen, plus cross-user isolation.
 - **Phase 3 (done):** summarized interpretation — five-element balance bars, day master read with a season-and-count strength lean, and prominent callouts for missing or heavily dominant elements. Fully rule-based and deterministic: every sentence is assembled from the verified chart data, no model calls.
-- Planned: Luck Pillars timeline, deployment.
+- **Phase 4 (done):** Luck Pillars — the ten-year cycle timeline (direction from birth gender + year-stem polarity, starting age from the solar-term distance at 3 days = 1 year), each period framed as a resource level relative to the day master, with the gui ren (天乙贵人) helpful-people signal marked per period. Verified against the Wikibooks worked example and cross-checked rule sources before shipping.
+- **Test-stage access gate:** a light shared-passphrase screen (passphrase configured via environment variable, not stored in this repository) keeps the demo to the intended audience during the feedback stage.
+- Landing page with hero, benefit cards, and coming-soon notes is live; the app is deployed and auto-deploys from this branch.
 
 ## Calculation conventions
 

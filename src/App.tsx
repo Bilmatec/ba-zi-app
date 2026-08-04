@@ -7,8 +7,10 @@ import {
   type Pillar,
 } from './lib/bazi/calculate'
 import { searchPlaces, placeLabel, type PlaceResult } from './lib/geo'
+import { calculateLuck, type LuckTimeline } from './lib/bazi/luck'
 import { supabase } from './lib/supabase'
 import { saveChart, type SavedChartRow } from './lib/charts-store'
+import LuckPillars from './components/LuckPillars'
 import AuthPanel from './components/AuthPanel'
 import SavedCharts from './components/SavedCharts'
 import Interpretation from './components/Interpretation'
@@ -160,6 +162,7 @@ export default function App() {
   const searchTimer = useRef<number | undefined>(undefined)
 
   const [chart, setChart] = useState<ChartResult | null>(null)
+  const [luck, setLuck] = useState<LuckTimeline | null>(null)
   const [lastInput, setLastInput] = useState<SavableInput | null>(null)
   const [openedName, setOpenedName] = useState('')
   const [error, setError] = useState('')
@@ -208,12 +211,15 @@ export default function App() {
 
   function runCalculation(input: SavableInput, sourceName = '') {
     try {
-      setChart(calculateChart(input))
+      const result = calculateChart(input)
+      setChart(result)
+      setLuck(calculateLuck(input, result))
       setLastInput(input)
       setOpenedName(sourceName)
       setError('')
     } catch (err) {
       setChart(null)
+      setLuck(null)
       setError(err instanceof Error ? err.message : 'Something went wrong calculating the chart.')
     }
   }
@@ -229,7 +235,7 @@ export default function App() {
     }
     if (!place) return setError('Please search for and select your birth city.')
     if (!gender) {
-      return setError('Please select your gender at birth (used for the Luck Pillars timeline).')
+      return setError('Please select your birth gender (used for the Luck Pillars timeline).')
     }
 
     const [y, m, d] = date.split('-').map(Number)
@@ -372,7 +378,7 @@ export default function App() {
 
         <label>
           <span className="label-with-tip">
-            Gender at birth
+            Birth gender
             <span className="info-tip" tabIndex={0} role="note" aria-label="Why only male or female?">
               ⓘ
               <span className="info-tip-bubble">
@@ -406,6 +412,7 @@ export default function App() {
       )}
       {chart && <ChartView chart={chart} />}
       {chart && <Interpretation chart={chart} />}
+      {chart && luck && <LuckPillars chart={chart} luck={luck} />}
       {chart && lastInput && user && (
         <SaveChartBox input={lastInput} onSaved={() => setSavedRefresh((n) => n + 1)} />
       )}
