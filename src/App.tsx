@@ -270,7 +270,31 @@ export default function App() {
   }
 
   function openSaved(row: SavedChartRow) {
-    runCalculation(row.input, row.chart_name)
+    // Repopulate the form with the saved birth details, so what's shown in
+    // "See your chart" is exactly the data this chart was calculated from.
+    const inp = row.input
+    const pad = (n: number) => String(n).padStart(2, '0')
+    setDate(`${inp.year}-${pad(inp.month)}-${pad(inp.day)}`)
+    if (inp.hour === undefined) {
+      setTimeUnknown(true)
+      setTime('')
+    } else {
+      setTimeUnknown(false)
+      setTime(`${pad(inp.hour)}:${pad(inp.minute ?? 0)}`)
+    }
+    setGender(inp.gender)
+    const savedPlace: PlaceResult = {
+      id: 0,
+      name: inp.placeLabel,
+      latitude: 0,
+      longitude: 0,
+      timezone: inp.timeZone,
+    }
+    setPlace(savedPlace)
+    setPlaceQuery(inp.placeLabel)
+    setPlaceResults([])
+
+    runCalculation(inp, row.chart_name)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
