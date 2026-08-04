@@ -34,6 +34,21 @@ const GENERATED_BY: Record<Element, Element> = {
   Wood: 'Water',
 }
 
+/** Short identity noun per stem, used when strength copy needs to separate
+ * what you are from how supported you are ("you are still the tree"). */
+const DAY_MASTER_NOUN: Record<string, string> = {
+  甲: 'the tree',
+  乙: 'the vine',
+  丙: 'the sun',
+  丁: 'the flame',
+  戊: 'the mountain',
+  己: 'the soil',
+  庚: 'the axe',
+  辛: 'the jewel',
+  壬: 'the river',
+  癸: 'the rain',
+}
+
 /** Traditional imagery for each day master stem, keyed by Chinese character. */
 const DAY_MASTER_IMAGERY: Record<string, string> = {
   甲: 'a tall tree — upright, steady growth that does not like being bent',
@@ -147,7 +162,7 @@ function balanceParagraph(
     const verb = names.length === 1 ? 'dominates' : 'dominate'
     if (dmOutnumbered) {
       sentences.push(
-        `${lead} ${verb} everything else, and ${lower(dayMaster)}, your day master, is outnumbered on both sides.`,
+        `${lead} ${verb} everything else, leaving ${lower(dayMaster)} — your day master — holding just ${counts[dayMaster]} of the ${total} positions.`,
       )
     } else {
       sentences.push(`${lead} ${verb} everything else.`)
@@ -202,7 +217,7 @@ function dayMasterParagraph(
     strength === 'strong'
       ? `Add it up and your day master leans strong: ${supporters} of your ${total} positions match or feed your element. A strong day master has fuel to spend, and charts like this tend to reward output more than caution.`
       : strength === 'weak'
-        ? `Add it up and your day master leans weak: only ${supporters} of your ${total} positions are on your side. That is not a verdict on you — a weak day master reads as someone whose results depend on backing: the right people, the right timing, the right ground. When those line up, the chart works.`
+        ? `Add it up and your day master leans weak: only ${supporters} of your ${total} positions match or feed your element. Weak describes your footing, not your size — you are still ${DAY_MASTER_NOUN[dm.chinese]}, just standing in ground that hands you little for free. Charts like this run on backing: the right people, the right timing, the right ground. When those line up, the chart works.`
         : `Add it up and your day master sits near the middle: ${supporters} of your ${total} positions support your element. Middle-weight charts move with circumstance — the balance tips one way or the other depending on the years you're moving through.`
 
   return `You are ${dm.pinyin} — ${dm.polarity.toLowerCase()} ${dmName}, traditionally pictured as ${imagery}. ${seasonSentence} ${strengthSentence}`

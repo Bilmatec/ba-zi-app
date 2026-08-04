@@ -93,6 +93,16 @@ describe('interpretation copy', () => {
     expect(reading.dominant[0]).toEqual({ element: 'Earth', count: 4 })
     expect(reading.extreme).toBe(true)
     expect(reading.paragraphs[0]).toContain('Earth dominates everything else')
+    // The outnumbered day master is stated with concrete numbers.
+    expect(reading.paragraphs[0]).toContain(
+      'leaving wood — your day master — holding just 1 of the 8 positions',
+    )
+  })
+
+  it('frames a weak day master as footing, not size', () => {
+    const text = interpretChart(ny1990).paragraphs[1]
+    expect(text).toContain('Weak describes your footing, not your size')
+    expect(text).toContain('you are still the jewel')
   })
 
   it('speaks in second person and never in clinical third person', () => {
