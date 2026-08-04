@@ -371,7 +371,17 @@ export default function App() {
         </label>
 
         <label>
-          Gender at birth
+          <span className="label-with-tip">
+            Gender at birth
+            <span className="info-tip" tabIndex={0} role="note" aria-label="Why only male or female?">
+              ⓘ
+              <span className="info-tip-bubble">
+                Ba Zi&apos;s formula is centuries old and uses only two values here: the gender
+                recorded at your birth. It sets the direction of your luck cycle — it isn&apos;t a
+                statement about who you are today.
+              </span>
+            </span>
+          </span>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value as 'male' | 'female' | '')}
