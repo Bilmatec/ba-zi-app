@@ -2,7 +2,9 @@
 
 A web app that calculates your Ba Zi (Four Pillars of Destiny) chart from your birth date, time, and location — and interprets it as a practical read on your elemental balance and life periods.
 
-Built as a graduation project, developed with Claude Code.
+**Live at: https://ba-zi-app.vercel.app**
+
+Built as a graduation project, developed with Claude Code. Deployed on Vercel (auto-deploys from this repository's main branch) with Supabase for accounts and saved charts.
 
 ## Status
 
