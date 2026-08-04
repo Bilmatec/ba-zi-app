@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline, LuckPeriod } from '../lib/bazi/luck'
 import { interpretChart, type Strength } from '../lib/bazi/interpret'
@@ -7,6 +8,8 @@ const RESOURCE_LABEL: Record<LuckPeriod['resource'], string> = {
   mixed: 'Mixed supply',
   scarce: 'Resource-scarce',
 }
+
+type Tense = 'past' | 'current' | 'future'
 
 function ordinal(n: number): string {
   const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'
@@ -23,8 +26,28 @@ function startAgeText(luck: LuckTimeline): string {
   return `at age ${parts.join(' and ')}`
 }
 
-function currentPeriodCopy(p: LuckPeriod, strength: Strength, pinyin: string): string {
-  const opening = `Right now you are in your ${ordinal(p.index)} pillar, ${pinyin}, running about age ${p.startAge} to ${p.startAge + 9} (${p.startYear}–${p.endYear}).`
+function periodCopy(p: LuckPeriod, strength: Strength, tense: Tense): string {
+  const pinyin = `${p.stem.pinyin} ${p.branch.pinyin}`
+  const span = `age ${p.startAge} to ${p.startAge + 9} (${p.startYear}–${p.endYear})`
+
+  if (tense === 'past') {
+    const opening = `Your ${ordinal(p.index)} pillar, ${pinyin}, ran from about ${span}.`
+    const resourceLine =
+      p.resource === 'rich'
+        ? `Both of its characters fed your element — a resource-rich stretch, years when support came easier.`
+        : p.resource === 'scarce'
+          ? `Neither of its characters fed your element — a resource-scarce stretch, years that likely asked you to run lean.`
+          : `One of its characters fed your element and one drew on it — a mixed stretch, with supply coming and going.`
+    const guiRenLine = p.guiRen
+      ? ` Gui ren sat in this pillar: help arriving through other people was part of those years' pattern.`
+      : ''
+    return `${opening} ${resourceLine}${guiRenLine}`
+  }
+
+  const opening =
+    tense === 'current'
+      ? `Right now you are in your ${ordinal(p.index)} pillar, ${pinyin}, running about ${span}.`
+      : `Your ${ordinal(p.index)} pillar, ${pinyin}, arrives around age ${p.startAge} and runs to about age ${p.startAge + 9} (${p.startYear}–${p.endYear}).`
 
   let resourceLine: string
   if (p.resource === 'rich') {
@@ -60,7 +83,21 @@ export default function LuckPillars({
   luck: LuckTimeline
 }) {
   const strength = interpretChart(chart).strength
-  const current = luck.currentIndex >= 0 ? luck.periods[luck.currentIndex] : null
+  const defaultIndex = luck.currentIndex >= 0 ? luck.currentIndex : 0
+  const [selected, setSelected] = useState(defaultIndex)
+
+  // A new calculation replaces the timeline — snap back to its own "now".
+  useEffect(() => {
+    setSelected(defaultIndex)
+  }, [luck, defaultIndex])
+
+  const p = luck.periods[selected]
+  const tense: Tense =
+    selected === luck.currentIndex
+      ? 'current'
+      : luck.currentIndex >= 0 && selected < luck.currentIndex
+        ? 'past'
+        : 'future'
 
   return (
     <section className="luck">
@@ -68,7 +105,8 @@ export default function LuckPillars({
       <p className="luck-intro">
         Life runs in ten-year chapters, each colored by one pillar. Yours move{' '}
         {luck.forward ? 'forward' : 'backward'} through the cycle and begin {startAgeText(luck)}.
-        Each chapter is a resource level to work with, not a verdict.
+        Each chapter is a resource level to work with, not a verdict. Click any pillar to read that
+        chapter.
       </p>
       {!chart.timeKnown && (
         <p className="luck-note">
@@ -76,53 +114,54 @@ export default function LuckPillars({
         </p>
       )}
 
-      <div className="luck-strip" role="list">
-        {luck.periods.map((p, i) => (
-          <div
-            role="listitem"
-            key={p.index}
-            className={`luck-card${i === luck.currentIndex ? ' luck-current' : ''}`}
+      <div className="luck-strip" role="tablist" aria-label="Luck pillar decades">
+        {luck.periods.map((period, i) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={i === selected}
+            key={period.index}
+            className={[
+              'luck-card',
+              i === luck.currentIndex ? 'luck-current' : '',
+              i === selected ? 'luck-selected' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={() => setSelected(i)}
           >
             {i === luck.currentIndex && <span className="luck-now">Now</span>}
-            <div className="luck-age">
-              Age {p.startAge}–{p.startAge + 9}
-            </div>
-            <div className="luck-years">
-              {p.startYear}–{p.endYear}
-            </div>
-            <div className="luck-glyphs">
-              {p.stem.chinese}
-              {p.branch.chinese}
-            </div>
-            <div className="luck-elements">
-              {p.stem.element} · {p.branch.element}
-            </div>
-            <div className={`luck-resource luck-resource-${p.resource}`}>
-              {RESOURCE_LABEL[p.resource]}
-            </div>
-            {p.guiRen && <div className="luck-guiren">✦ helpful people</div>}
-          </div>
+            <span className="luck-age">
+              Age {period.startAge}–{period.startAge + 9}
+            </span>
+            <span className="luck-years">
+              {period.startYear}–{period.endYear}
+            </span>
+            <span className="luck-glyphs">
+              {period.stem.chinese}
+              {period.branch.chinese}
+            </span>
+            <span className="luck-elements">
+              {period.stem.element} · {period.branch.element}
+            </span>
+            <span className={`luck-resource luck-resource-${period.resource}`}>
+              {RESOURCE_LABEL[period.resource]}
+            </span>
+            {period.guiRen && <span className="luck-guiren">✦ helpful people</span>}
+          </button>
         ))}
       </div>
 
-      {current ? (
-        <div className="luck-reading">
-          <p>
-            {currentPeriodCopy(
-              current,
-              strength,
-              `${current.stem.pinyin} ${current.branch.pinyin}`,
-            )}
-          </p>
-        </div>
-      ) : (
-        <div className="luck-reading">
-          <p>
-            You have not yet entered your first pillar — these chapters begin at age{' '}
-            {luck.startAgeYears}. Until then, the birth chart above is the whole picture.
-          </p>
-        </div>
+      {luck.currentIndex < 0 && (
+        <p className="luck-note">
+          You have not yet entered your first pillar — these chapters begin {startAgeText(luck)}.
+          Until then, the birth chart above is the whole picture.
+        </p>
       )}
+
+      <div className="luck-reading">
+        <p>{periodCopy(p, strength, tense)}</p>
+      </div>
     </section>
   )
 }

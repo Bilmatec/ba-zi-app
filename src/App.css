@@ -458,6 +458,37 @@ h2,
   position: relative;
 }
 
+.place-input-wrap {
+  position: relative;
+  display: block;
+}
+
+.place-input-wrap input {
+  width: 100%;
+  padding-right: 2.2rem;
+}
+
+.place-clear {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 50%;
+  background: #ecebe7;
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.place-clear:hover {
+  background: #ddd9cf;
+  color: var(--ink);
+}
+
 .place-hint {
   font-weight: 400;
   font-size: 0.85rem;
@@ -731,17 +762,32 @@ h2,
 .luck-card {
   position: relative;
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 128px;
   padding: 0.8rem 0.6rem;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
   text-align: center;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.luck-card:hover {
+  border-color: var(--navy);
 }
 
 .luck-current {
   border: 2px solid var(--ember);
   background: #fff3d6;
+}
+
+.luck-selected {
+  outline: 2px solid var(--navy);
+  outline-offset: 1px;
 }
 
 .luck-now {

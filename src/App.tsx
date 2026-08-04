@@ -347,15 +347,31 @@ export default function App() {
 
         <label className="place-field">
           Birth city
-          <input
-            type="text"
-            placeholder="Start typing a city name…"
-            value={placeQuery}
-            onChange={(e) => {
-              setPlaceQuery(e.target.value)
-              setPlace(null)
-            }}
-          />
+          <span className="place-input-wrap">
+            <input
+              type="text"
+              placeholder="Start typing a city name…"
+              value={placeQuery}
+              onChange={(e) => {
+                setPlaceQuery(e.target.value)
+                setPlace(null)
+              }}
+            />
+            {placeQuery.length > 0 && (
+              <button
+                type="button"
+                className="place-clear"
+                aria-label="Clear birth city"
+                onClick={() => {
+                  setPlaceQuery('')
+                  setPlace(null)
+                  setPlaceResults([])
+                }}
+              >
+                ×
+              </button>
+            )}
+          </span>
           {searching && <div className="place-hint">Searching…</div>}
           {placeResults.length > 0 && (
             <ul className="place-results">
