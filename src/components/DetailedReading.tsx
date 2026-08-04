@@ -2,7 +2,13 @@ import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline } from '../lib/bazi/luck'
-import { detailedReading, tenGodOf, HIDDEN_STEMS } from '../lib/bazi/detail'
+import {
+  detailedReading,
+  tenGodOf,
+  HIDDEN_STEMS,
+  type TenGod,
+  type TenGodEntry,
+} from '../lib/bazi/detail'
 import { interpretChart, roleOf, ELEMENTS } from '../lib/bazi/interpret'
 import { STEMS, type Element } from '../lib/bazi/data'
 import { isUnlocked, unlockDetailed } from '../lib/unlock'
@@ -72,7 +78,9 @@ export default function DetailedReading({
       <h3>Inside the branches: hidden stems</h3>
       <p>
         Every branch carries one to three hidden stems — elements working under the surface that
-        the free balance doesn&apos;t count. Here is what yours are holding:
+        the free balance doesn&apos;t count. The first stem listed in each branch is its{' '}
+        <em>main qi</em>, the branch&apos;s strongest voice; any others speak more quietly. Here is
+        what yours are holding:
       </p>
       <div className="hidden-grid">
         {detail.hiddenPillars.map((hp) => (
@@ -137,9 +145,10 @@ export default function DetailedReading({
       <p>
         This is also where your day master&apos;s strength shows its work. On the surface,{' '}
         {surfaceSupporters} of your {reading.total} visible positions match or feed {lower(dm.element)}.
-        Counting the hidden stems, it&apos;s {extendedSupporters} of {detail.extendedTotal}. The
-        season ({lower(chart.monthPillar.branch.element)} month) weighs in on top of the count,
-        which is how the reading arrives at &ldquo;{reading.strength}&rdquo;.
+        Counting the hidden stems, it&apos;s {extendedSupporters} of {detail.extendedTotal}.{' '}
+        {seasonPhrase(reading.seasonRelation, lower(chart.monthPillar.branch.element), lower(dm.element))}{' '}
+        The count and the season together are how the reading arrives at &ldquo;
+        {reading.strength}&rdquo;.
       </p>
 
       <h3>The Ten Gods: who everyone is to you</h3>
@@ -182,7 +191,11 @@ export default function DetailedReading({
           <h3>Your current decade, in depth</h3>
           <p>
             {`Your ${current.stem.pinyin} ${current.branch.pinyin} pillar (${current.startYear}–${current.endYear}) breaks down like this: the visible stem ${current.stem.chinese} is ${lower(current.stem.element)}, your ${roleLabel(roleOf(dm.element, current.stem.element))}; the branch ${current.branch.chinese} carries ${lower(current.branch.element)} on the surface, and hides ${hiddenListFor(current.branch.chinese)} underneath. `}
-            {`The decade also takes a seat in your cast: its stem plays ${tenGodOf(dm, current.stem).english} (${tenGodOf(dm, current.stem).chinese}) and its branch's main qi plays ${tenGodOf(dm, STEMS[HIDDEN_STEMS[current.branch.chinese][0]]).english} (${tenGodOf(dm, STEMS[HIDDEN_STEMS[current.branch.chinese][0]]).chinese}) — guest roles that sit alongside the lifelong ones above for these ten years, reinforcing them where they repeat and adding what your birth chart lacks where they don't. `}
+            {decadeCastSentence(
+              tenGodOf(dm, current.stem),
+              tenGodOf(dm, STEMS[HIDDEN_STEMS[current.branch.chinese][0]]),
+              detail.tenGods,
+            )}{' '}
             {current.guiRen
               ? `Gui ren also sits in this branch — in these years, the helpful-people signal is not an abstraction; it names the decade you are in.`
               : `The decade carries no gui ren marker, so its gifts route through your own effort more than through patrons.`}
@@ -215,6 +228,55 @@ export default function DetailedReading({
       )}
     </section>
   )
+}
+
+// States which way the birth season pushes the strength verdict.
+function seasonPhrase(
+  relation: ReturnType<typeof interpretChart>['seasonRelation'],
+  monthElement: string,
+  dmElement: string,
+): string {
+  // "an earth month" but "a fire month".
+  const inMonth = `born in ${/^[aeiou]/.test(monthElement) ? 'an' : 'a'} ${monthElement} month`
+  switch (relation) {
+    case 'same':
+      return `The season helps too: ${inMonth}, your own element holds the season.`
+    case 'feeds':
+      return `The season helps too: ${inMonth}, the season feeds ${dmElement}.`
+    case 'drains':
+      return `The season leans the other way: ${inMonth}, the season draws on ${dmElement}.`
+    case 'opposes':
+      return `The season leans the other way: ${inMonth}, the season pushes against ${dmElement}.`
+    case 'yields':
+      return `The season sits roughly neutral: ${inMonth}, ${dmElement} controls the season, though holding that ground costs effort.`
+  }
+}
+
+// The decade's two characters join the lifelong cast for ten years. The app
+// knows whether their roles repeat existing cast members or bring something
+// new, so the copy states the applicable case instead of describing both.
+function decadeCastSentence(
+  stemGod: TenGod,
+  branchGod: TenGod,
+  cast: TenGodEntry[],
+): string {
+  const countOf = (god: TenGod) => cast.filter((t) => t.god.chinese === god.chinese).length
+  const times = (n: number) => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`)
+
+  if (stemGod.chinese === branchGod.chinese) {
+    const n = countOf(stemGod)
+    return n > 0
+      ? `The decade brings two guests into your cast, and both play ${stemGod.english} (${stemGod.chinese}) — a role your birth chart already casts ${times(n)}. These ten years don't introduce a new theme; they turn that one up louder.`
+      : `The decade brings two guests into your cast, and both play ${stemGod.english} (${stemGod.chinese}) — ${stemGod.meaning}. Your birth chart doesn't otherwise cast this role, so for these ten years it is a genuinely new voice.`
+  }
+
+  const describe = (god: TenGod, source: string) => {
+    const n = countOf(god)
+    return n > 0
+      ? `its ${source} plays ${god.english} (${god.chinese}), a role already in your lifelong cast`
+      : `its ${source} plays ${god.english} (${god.chinese}) — ${god.meaning} — a role your birth chart doesn't otherwise carry`
+  }
+  return `The decade brings two guests into your cast: ${describe(stemGod, 'stem')}, and ${describe(branchGod, "branch's main qi")}. For these ten years they sit alongside the roles above.`
 }
 
 function hiddenListFor(branchChar: string): string {
