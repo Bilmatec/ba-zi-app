@@ -228,7 +228,9 @@ export default function App() {
       return setError('Please enter your birth time, or tick "I don\'t know my birth time".')
     }
     if (!place) return setError('Please search for and select your birth city.')
-    if (!gender) return setError('Please select a gender (used for the Luck Pillars timeline).')
+    if (!gender) {
+      return setError('Please select your gender at birth (used for the Luck Pillars timeline).')
+    }
 
     const [y, m, d] = date.split('-').map(Number)
     const [hh, mm] = timeUnknown ? [undefined, undefined] : time.split(':').map(Number)
@@ -369,7 +371,7 @@ export default function App() {
         </label>
 
         <label>
-          Gender
+          Gender at birth
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value as 'male' | 'female' | '')}
