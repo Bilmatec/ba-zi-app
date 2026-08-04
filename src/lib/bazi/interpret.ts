@@ -107,6 +107,21 @@ export function countElements(chart: ChartResult): { counts: Record<Element, num
   return { counts, total }
 }
 
+/**
+ * How any element stands relative to the day master, in the five classic
+ * roles: peer (same), resource (generates you), output (you generate it),
+ * wealth (you control it), pressure (it controls you).
+ */
+export type ElementRole = 'peer' | 'resource' | 'output' | 'wealth' | 'pressure'
+
+export function roleOf(dayMaster: Element, other: Element): ElementRole {
+  if (other === dayMaster) return 'peer'
+  if (GENERATES[other] === dayMaster) return 'resource'
+  if (GENERATES[dayMaster] === other) return 'output'
+  if (CONTROLS[dayMaster] === other) return 'wealth'
+  return 'pressure'
+}
+
 export function seasonRelation(dayMaster: Element, monthBranch: Element): SeasonRelation {
   if (monthBranch === dayMaster) return 'same'
   if (GENERATES[monthBranch] === dayMaster) return 'feeds'

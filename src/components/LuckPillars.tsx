@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline, LuckPeriod } from '../lib/bazi/luck'
-import { interpretChart, type Strength } from '../lib/bazi/interpret'
+import { interpretChart, roleOf, type Strength, type ElementRole } from '../lib/bazi/interpret'
+import type { Element } from '../lib/bazi/data'
 
 const RESOURCE_LABEL: Record<LuckPeriod['resource'], string> = {
   rich: 'Resource-rich',
@@ -26,22 +27,73 @@ function startAgeText(luck: LuckTimeline): string {
   return `at age ${parts.join(' and ')}`
 }
 
-function periodCopy(p: LuckPeriod, strength: Strength, tense: Tense): string {
+// One short clause per element role, present and past tense. These are what
+// make each decade read differently: the same "resource-scarce" level lands
+// differently when the years run on the element you act on versus the element
+// that presses on you.
+const ROLE_CLAUSE: Record<ElementRole, { present: string; past: string }> = {
+  peer: {
+    present: 'your own element, bringing peers and competition onto your ground',
+    past: 'your own element, crowding those years with peers and competition',
+  },
+  resource: {
+    present: 'the element that feeds you',
+    past: 'the element that fed you',
+  },
+  output: {
+    present: 'the element you produce, which draws work and expression out of you',
+    past: 'the element you produce, which drew plenty out of you',
+  },
+  wealth: {
+    present: 'the element you act on, where effort turns into results',
+    past: 'the element you act on, so what those years gave, they gave for effort',
+  },
+  pressure: {
+    present: 'the element that presses on you, setting structure and demands',
+    past: 'the element that pressed on you with structure and demands',
+  },
+}
+
+function elementFlavor(p: LuckPeriod, dayMaster: Element, tense: Tense): string {
+  const t = tense === 'past' ? 'past' : 'present'
+  const a = p.stem.element
+  const b = p.branch.element
+  const lower = (e: Element) => e.toLowerCase()
+  if (a === b) {
+    const clause = ROLE_CLAUSE[roleOf(dayMaster, a)][t]
+    return tense === 'past'
+      ? `Both of its characters were ${lower(a)} — ${clause}.`
+      : `Both of its characters are ${lower(a)} — ${clause}.`
+  }
+  const clauseA = ROLE_CLAUSE[roleOf(dayMaster, a)][t]
+  const clauseB = ROLE_CLAUSE[roleOf(dayMaster, b)][t]
+  return tense === 'past'
+    ? `In it, ${lower(a)} was ${clauseA}, and ${lower(b)} was ${clauseB}.`
+    : `In it, ${lower(a)} is ${clauseA}, and ${lower(b)} is ${clauseB}.`
+}
+
+function periodCopy(
+  p: LuckPeriod,
+  strength: Strength,
+  tense: Tense,
+  dayMaster: Element,
+): string {
   const pinyin = `${p.stem.pinyin} ${p.branch.pinyin}`
   const span = `age ${p.startAge} to ${p.startAge + 9} (${p.startYear}–${p.endYear})`
+  const flavor = elementFlavor(p, dayMaster, tense)
 
   if (tense === 'past') {
     const opening = `Your ${ordinal(p.index)} pillar, ${pinyin}, ran from about ${span}.`
     const resourceLine =
       p.resource === 'rich'
-        ? `Both of its characters fed your element — a resource-rich stretch, years when support came easier.`
+        ? `A resource-rich stretch, years when support came easier.`
         : p.resource === 'scarce'
-          ? `Neither of its characters fed your element — a resource-scarce stretch, years that likely asked you to run lean.`
-          : `One of its characters fed your element and one drew on it — a mixed stretch, with supply coming and going.`
+          ? `A resource-scarce stretch, years that likely asked you to run lean.`
+          : `A mixed stretch, with supply coming and going.`
     const guiRenLine = p.guiRen
       ? ` Gui ren sat in this pillar: help arriving through other people was part of those years' pattern.`
       : ''
-    return `${opening} ${resourceLine}${guiRenLine}`
+    return `${opening} ${flavor} ${resourceLine}${guiRenLine}`
   }
 
   const opening =
@@ -53,26 +105,26 @@ function periodCopy(p: LuckPeriod, strength: Strength, tense: Tense): string {
   if (p.resource === 'rich') {
     resourceLine =
       strength === 'weak'
-        ? `Both of its characters feed your element, so supply runs toward you in these years. For a lightly backed day master like yours, that is traction: a stretch for starting things and for asking for more.`
+        ? `Supply runs toward you in these years. For a lightly backed day master like yours, that is traction: a stretch for starting things and for asking for more.`
         : strength === 'strong'
-          ? `Both of its characters feed your element. You already carry plenty, so this chapter reads as surplus; the question is where you choose to spend it.`
-          : `Both of its characters feed your element, so more arrives than drains in these years. The balance tips your way.`
+          ? `You already carry plenty, so this chapter reads as surplus; the question is where you choose to spend it.`
+          : `More arrives than drains in these years; the balance tips your way.`
   } else if (p.resource === 'scarce') {
     resourceLine =
       strength === 'weak'
-        ? `Neither of its characters feeds your element, so little arrives on its own in these years. Conserve, choose your efforts with care, and let the people who back you carry part of the load.`
+        ? `Little arrives on its own in these years. Conserve, choose your efforts with care, and let the people who back you carry part of the load.`
         : strength === 'strong'
-          ? `Neither of its characters feeds your element, but you carry your own fuel, so lean supply costs you less than it would most. These read as working years: output over intake.`
-          : `Neither of its characters feeds your element, so less arrives than drains in these years. Budget your energy accordingly.`
+          ? `You carry your own fuel, so lean supply costs you less than it would most. These read as working years: output over intake.`
+          : `Less arrives than drains in these years. Budget your energy accordingly.`
   } else {
-    resourceLine = `One of its two characters feeds your element and the other draws on it, so supply comes and goes in these years. Timing matters more than volume.`
+    resourceLine = `Supply comes and goes in these years. Timing matters more than volume.`
   }
 
   const guiRenLine = p.guiRen
     ? `This pillar also carries gui ren, the helpful-people signal: doors tend to open through others in these years, so ask.`
     : `This pillar carries no gui ren marker, so count on your own footing first and treat help that arrives as a bonus.`
 
-  return `${opening} ${resourceLine} ${guiRenLine}`
+  return `${opening} ${flavor} ${resourceLine} ${guiRenLine}`
 }
 
 export default function LuckPillars({
@@ -160,7 +212,7 @@ export default function LuckPillars({
       )}
 
       <div className="luck-reading">
-        <p>{periodCopy(p, strength, tense)}</p>
+        <p>{periodCopy(p, strength, tense, chart.dayMaster.element)}</p>
       </div>
     </section>
   )

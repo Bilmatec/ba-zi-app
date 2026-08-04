@@ -69,8 +69,12 @@ describe('gui ren (天乙贵人) per period', () => {
       year: 1940, month: 11, day: 27, hour: 8, minute: 0,
       timeZone: 'America/Los_Angeles', gender: 'male',
     })
-    const flags = luck.periods.map((p) => p.guiRen)
-    expect(flags).toEqual([false, true, false, false, false, false, false, true])
+    for (const p of luck.periods) {
+      expect(p.guiRen).toBe(p.branch.chinese === '丑' || p.branch.chinese === '未')
+    }
+    // The known hits in his sequence: 己丑 (2nd) and 乙未 (8th).
+    expect(luck.periods[1].guiRen).toBe(true)
+    expect(luck.periods[7].guiRen).toBe(true)
   })
 
   it('marks 亥 and 酉 periods for a 丁 day master', () => {
@@ -111,6 +115,21 @@ describe('resource levels', () => {
 })
 
 describe('timeline bookkeeping', () => {
+  it('always shows at least one pillar beyond the current one, even late in life', () => {
+    // Someone born in 1940 is in their late 80s today — their current decade
+    // sits past the default eight pillars, so the timeline must extend.
+    const luck = luckFor({
+      year: 1940, month: 11, day: 27, hour: 8, minute: 0,
+      timeZone: 'America/Los_Angeles', gender: 'male',
+    })
+    expect(luck.currentIndex).toBeGreaterThanOrEqual(0)
+    expect(luck.periods.length).toBeGreaterThanOrEqual(luck.currentIndex + 2)
+    const nowYear = new Date().getFullYear()
+    const current = luck.periods[luck.currentIndex]
+    expect(nowYear).toBeGreaterThanOrEqual(current.startYear)
+    expect(nowYear).toBeLessThanOrEqual(current.endYear)
+  })
+
   it('periods are consecutive decades with consistent years and ages', () => {
     const luck = luckFor({
       year: 1968, month: 10, day: 31, hour: 16, minute: 26,

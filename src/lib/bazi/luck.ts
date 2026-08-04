@@ -98,8 +98,11 @@ export function calculateLuck(input: BirthInput, chart: ChartResult): LuckTimeli
   const dayMaster = chart.dayMaster.element
   const guiRenBranches = GUI_REN[chart.dayMaster.chinese] ?? []
 
-  const periods: LuckPeriod[] = yun
-    .getDaYun(9)
+  // Generate 12 decades (to roughly age 120), then trim below: the display
+  // shows at least 8, and always at least one pillar beyond the current one,
+  // so nobody's timeline ends at the decade they are standing in.
+  const allPeriods: LuckPeriod[] = yun
+    .getDaYun(13)
     .slice(1) // index 0 is the pre-luck childhood span, not a pillar
     .map((dy) => {
       const ganzhi = dy.getGanZhi()
@@ -130,9 +133,15 @@ export function calculateLuck(input: BirthInput, chart: ChartResult): LuckTimeli
 
   const nowYear = new Date().getFullYear()
   let currentIndex = -1
-  periods.forEach((p, i) => {
+  allPeriods.forEach((p, i) => {
     if (nowYear >= p.startYear && nowYear <= p.endYear) currentIndex = i
   })
+
+  const visibleCount = Math.min(
+    allPeriods.length,
+    Math.max(8, currentIndex + 2), // current pillar plus at least one more
+  )
+  const periods = allPeriods.slice(0, visibleCount)
 
   return {
     forward: yun.isForward(),
