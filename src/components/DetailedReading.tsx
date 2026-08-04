@@ -14,7 +14,8 @@ import {
   type DetailedReadingData,
 } from '../lib/bazi/detail'
 import { interpretChart, roleOf, ELEMENTS, type Strength } from '../lib/bazi/interpret'
-import { STEMS, type Element } from '../lib/bazi/data'
+import { STEMS, BRANCHES, type Element } from '../lib/bazi/data'
+import { annualReport, clashPartner, type AnnualReport } from '../lib/bazi/annual'
 import { isUnlocked, unlockDetailed } from '../lib/unlock'
 
 const ELEMENT_COLORS: Record<Element, string> = {
@@ -120,6 +121,15 @@ function favorableParagraph(
     ? ` The ${unfavPresent} add support you already hold in surplus; tradition counts those the least useful part of a strong chart.`
     : ''
   return `Because your day master runs strong, more feeding is the one thing you don't need — what serves you are outlets: opportunity, pressure, and expression. ${favPart}${unfavPart}`
+}
+
+function annualLead(annual: AnnualReport): string {
+  const yearName = `${annual.branch.animal}`
+  if (annual.clashes.length === 0) {
+    return `In plain terms: this ${yearName} year doesn't collide with anything you carry — its themes arrive gently, and the steering stays in your hands.`
+  }
+  const where = listJoin(annual.clashes.map((c) => c.location))
+  return `In plain terms: this ${yearName} year runs directly across your ${where} — which marks it as a year of significant movement. Plans reshuffle, stuck things come loose, and directions can change. That makes it an important year, not a bad one.`
 }
 
 function decadeLead(
@@ -232,6 +242,8 @@ export default function DetailedReading({
     detail.extendedCounts[dm.element] + detail.extendedCounts[GENERATED_BY[dm.element]]
 
   const categoryCounts = castCategoryCounts(detail.tenGods)
+  const annual = annualReport(chart, luck)
+  const annualPartner = BRANCHES[clashPartner(annual.branch.chinese)]
   const current = luck.currentIndex >= 0 ? luck.periods[luck.currentIndex] : null
   const currentStemGod = current ? tenGodOf(dm, current.stem) : null
   const currentBranchGod = current
@@ -378,6 +390,21 @@ export default function DetailedReading({
           </p>
         </>
       )}
+
+      <h3>This year: the annual pillar</h3>
+      <p className="section-lead">{annualLead(annual)}</p>
+      <p>
+        {`The mechanics: ${annual.calendarYear} runs as ${annual.stem.chinese}${annual.branch.chinese} (${annual.stem.pinyin} ${annual.branch.pinyin} — ${annual.stem.polarity.toLowerCase()} ${lower(annual.stem.element)} over the ${annual.branch.animal}). In Ba Zi the year turns at Lìchūn in early February, not on January 1${annual.beforeLichun ? ` — which is why, right now, the previous year's pillar is still the one running` : ''}. Each branch has one direct opposite, six steps across the cycle, and a year whose branch meets its opposite in a chart is called a clash (冲) — traditionally read as movement and a change of direction, not as an omen. This ${annual.branch.animal} year's opposite is the ${annualPartner.animal}. Checked against your ${chart.timeKnown ? 'four' : 'three'} birth branches and your current decade: `}
+        {annual.clashes.length === 0
+          ? `no clashes — the year passes through without meeting an opposite, so its themes blend in rather than shake things.`
+          : annual.clashes
+              .map((c) =>
+                c.isLuckPillar
+                  ? `the year meets your current decade's ${c.branch.animal} head-on — movement at the decade level, where the backdrop of these years itself shifts`
+                  : `the year meets the ${c.branch.animal} in your ${c.location} head-on, so the movement centers there`,
+              )
+              .join('; ') + `.`}
+      </p>
     </div>
   )
 
