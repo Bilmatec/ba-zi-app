@@ -3,7 +3,13 @@ import { LunarUtil } from 'lunar-typescript'
 import { STEMS } from './data'
 import { calculateChart } from './calculate'
 import { interpretChart } from './interpret'
-import { HIDDEN_STEMS, tenGodOf, detailedReading } from './detail'
+import {
+  HIDDEN_STEMS,
+  tenGodOf,
+  detailedReading,
+  castCategoryCounts,
+  favorableCategories,
+} from './detail'
 
 describe('hidden stems table', () => {
   it('matches the library’s ZHI_HIDE_GAN for all 12 branches (membership and order)', () => {
@@ -76,6 +82,24 @@ describe('detailed reading', () => {
     const d = detailedReading(noHour, interpretChart(noHour).strength)
     expect(d.hiddenPillars).toHaveLength(3)
     expect(d.tenGods).toHaveLength(5) // 2 non-day stems + 3 branch main qis
+  })
+
+  it('groups the 1968 cast into categories correctly', () => {
+    // Cast: Indirect Wealth ×3, Indirect Resource ×2, Seven Killings ×2.
+    const counts = castCategoryCounts(detail.tenGods)
+    expect(counts).toEqual({ companion: 0, output: 0, wealth: 3, officer: 2, resource: 2 })
+  })
+
+  it('applies the support-or-restrain rule by strength', () => {
+    expect(favorableCategories('weak')).toEqual({
+      favorable: ['resource', 'companion'],
+      unfavorable: ['wealth', 'officer', 'output'],
+    })
+    expect(favorableCategories('strong')).toEqual({
+      favorable: ['wealth', 'officer', 'output'],
+      unfavorable: ['resource', 'companion'],
+    })
+    expect(favorableCategories('balanced')).toBeNull()
   })
 
   it('suggests the resource element for a weak day master, hedged elsewhere', () => {

@@ -121,6 +121,39 @@ function hiddenOf(branchChar: string): StemInfo[] {
   return (HIDDEN_STEMS[branchChar] ?? []).map((c) => STEMS[c])
 }
 
+export type TenGodCategory = TenGod['category']
+
+/** How many cast members fall in each of the five role categories. */
+export function castCategoryCounts(entries: TenGodEntry[]): Record<TenGodCategory, number> {
+  const counts: Record<TenGodCategory, number> = {
+    companion: 0,
+    output: 0,
+    wealth: 0,
+    officer: 0,
+    resource: 0,
+  }
+  for (const e of entries) counts[e.god.category]++
+  return counts
+}
+
+/**
+ * The classical support-or-restrain (扶抑) rule: a weak day master is helped
+ * by the giving categories and drained by the spending ones; a strong day
+ * master is the reverse. Near the middle the rule loses its force, so
+ * balanced charts get null and the copy says so honestly.
+ */
+export function favorableCategories(
+  strength: 'strong' | 'weak' | 'balanced',
+): { favorable: TenGodCategory[]; unfavorable: TenGodCategory[] } | null {
+  if (strength === 'weak') {
+    return { favorable: ['resource', 'companion'], unfavorable: ['wealth', 'officer', 'output'] }
+  }
+  if (strength === 'strong') {
+    return { favorable: ['wealth', 'officer', 'output'], unfavorable: ['resource', 'companion'] }
+  }
+  return null
+}
+
 export function detailedReading(chart: ChartResult, strength: 'strong' | 'weak' | 'balanced'): DetailedReadingData {
   const pillars: { label: string; pillar: Pillar | null }[] = [
     { label: 'Year', pillar: chart.yearPillar },

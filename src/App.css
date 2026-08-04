@@ -889,6 +889,14 @@ h2,
   color: #333;
 }
 
+.section-lead {
+  font-size: 1rem !important;
+  font-weight: 500;
+  color: var(--ink) !important;
+  border-left: 3px solid var(--gold);
+  padding-left: 0.8rem;
+}
+
 .hidden-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
