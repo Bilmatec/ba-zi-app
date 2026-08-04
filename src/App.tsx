@@ -11,6 +11,7 @@ import { calculateLuck, type LuckTimeline } from './lib/bazi/luck'
 import { supabase } from './lib/supabase'
 import { saveChart, type SavedChartRow } from './lib/charts-store'
 import LuckPillars from './components/LuckPillars'
+import DetailedReading from './components/DetailedReading'
 import AuthPanel from './components/AuthPanel'
 import SavedCharts from './components/SavedCharts'
 import Interpretation from './components/Interpretation'
@@ -444,6 +445,7 @@ export default function App() {
       {chart && <ChartView chart={chart} />}
       {chart && <Interpretation chart={chart} />}
       {chart && luck && <LuckPillars chart={chart} luck={luck} />}
+      {chart && luck && <DetailedReading chart={chart} luck={luck} user={user} />}
       {chart && lastInput && user && (
         <SaveChartBox input={lastInput} onSaved={() => setSavedRefresh((n) => n + 1)} />
       )}
