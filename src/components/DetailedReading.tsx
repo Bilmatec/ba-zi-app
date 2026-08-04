@@ -61,7 +61,7 @@ function hiddenLead(detail: DetailedReadingData, surface: Record<Element, number
   }
   if (detail.trulyMissing.length > 0) {
     const missing = detail.trulyMissing.map(lower).join(' and ')
-    return `In plain terms: even under the surface, your chart holds no ${missing} at all. That absence is real, not an artifact of counting — and decades or years that bring it will feel different.`
+    return `In plain terms: your chart travels light in ${missing} — it doesn't appear even under the surface. Nothing needs fixing about that; it simply means that when a decade or a year brings ${detail.trulyMissing.length > 1 ? 'those elements' : 'that element'} in, you'll likely feel it more vividly than most people would.`
   }
   const surfaceTop = ELEMENTS.reduce((a, b) => (surface[b] > surface[a] ? b : a))
   const extTop = ELEMENTS.reduce((a, b) =>
@@ -85,7 +85,7 @@ function castLead(counts: Record<TenGodCategory, number>, total: number): string
     ? `, with ${listJoin(rest.map(([c, n]) => `${CATEGORY_LABEL[c]} ×${n}`))}`
     : ''
   const absentText = absent.length
-    ? ` It carries no ${absent.join(' and no ')} at all — those parts of life run on borrowed machinery, not built-in.`
+    ? ` It carries no ${absent.join(' and no ')}. Those aren't closed doors — they're just not automatic for you: places you get to by choice, practice, or good company rather than by default.`
     : ''
   return `In plain terms: your chart's cast leans toward ${CATEGORY_LABEL[top[0]]} — ${top[1]} of its ${total} roles${restText}.${absentText}`
 }
@@ -106,16 +106,16 @@ function favorableParagraph(
   if (strength === 'weak') {
     const favPart = favPresent
       ? `In your cast, ${favPresent} ${rule.favorable.filter((c) => counts[c] > 0).length > 1 || counts[rule.favorable.find((c) => counts[c] > 0)!] > 1 ? 'are' : 'is'} where your footing comes from — lean there first.`
-      : `Your cast holds none of the giving roles, which says in role language what the element balance already said: this chart spends you, and backing has to come from the people and timing around you.`
+      : `Your cast holds none of the giving roles, which says in role language what the element balance already said: your backing comes from outside the chart — the people around you and the timing you choose.`
     const unfavPart = unfavPresent
-      ? ` The rest — ${unfavPresent} — are spending roles: real capability, but they draw down your reserves rather than refill them.`
+      ? ` The rest — ${unfavPresent} — put you to work: real capability, and it spends energy rather than restores it, which is worth knowing when you plan.`
       : ''
-    return `Because your day master runs weak, the classical rule of thumb is simple: giving roles help you, spending roles cost you. ${favPart}${unfavPart}`
+    return `Because your day master runs weak, the classical rule of thumb is simple: giving roles feed your footing, spending roles put it to use. ${favPart}${unfavPart}`
   }
 
   const favPart = favPresent
     ? `Your ${favPresent} ${counts[rule.favorable.find((c) => counts[c] > 0)!] > 1 ? 'give' : 'gives'} that surplus somewhere to go.`
-    : `Your cast is thin on outlets, so the surplus tends to look for its own exits — worth knowing about yourself.`
+    : `Your cast is light on outlets, so giving your surplus somewhere deliberate to go matters more for you than for most.`
   const unfavPart = unfavPresent
     ? ` The ${unfavPresent} add support you already hold in surplus; tradition counts those the least useful part of a strong chart.`
     : ''
@@ -132,7 +132,7 @@ function decadeLead(
     const n = counts[stemGod.category]
     return n > 0
       ? `In plain terms: these ten years bring a double helping of ${label} — more of the very thing your chart already carries${n >= 3 ? ' most' : ''}.`
-      : `In plain terms: these ten years bring ${label} — something your birth chart otherwise lacks. A borrowed decade of it.`
+      : `In plain terms: these ten years bring ${label} into your life — a theme your chart doesn't supply on its own. The decade carries it for you, and ten years is long enough to make something lasting of it.`
   }
   return `In plain terms: these ten years bring ${CATEGORY_LABEL[stemGod.category]} and ${CATEGORY_LABEL[branchGod.category]} into your life at once.`
 }

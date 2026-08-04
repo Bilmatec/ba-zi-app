@@ -34,7 +34,7 @@ function startAgeText(luck: LuckTimeline): string {
 const ROLE_CLAUSE: Record<ElementRole, { present: string; past: string }> = {
   peer: {
     present: 'your own element, bringing peers and competition onto your ground',
-    past: 'your own element, crowding those years with peers and competition',
+    past: 'your own element, filling those years with peers and competition',
   },
   resource: {
     present: 'the element that feeds you',
@@ -46,7 +46,7 @@ const ROLE_CLAUSE: Record<ElementRole, { present: string; past: string }> = {
   },
   wealth: {
     present: 'the element you act on, where effort turns into results',
-    past: 'the element you act on, so what those years gave, they gave for effort',
+    past: 'the element you act on, so those years tended to reward effort',
   },
   pressure: {
     present: 'the element that presses on you, setting structure and demands',
@@ -115,7 +115,7 @@ function periodCopy(
         ? `Little arrives on its own in these years. Conserve, choose your efforts with care, and let the people who back you carry part of the load.`
         : strength === 'strong'
           ? `You carry your own fuel, so lean supply costs you less than it would most. These read as working years: output over intake.`
-          : `Less arrives than drains in these years. Budget your energy accordingly.`
+          : `Less arrives than drains in these years. Pace yourself, and spend your effort where it matters most to you.`
   } else {
     resourceLine = `Supply comes and goes in these years. Timing matters more than volume.`
   }
