@@ -95,23 +95,32 @@ describe('interpretation copy', () => {
     expect(reading.paragraphs[0]).toContain('Earth dominates everything else')
     // The outnumbered day master is stated with concrete numbers.
     expect(reading.paragraphs[0]).toContain(
-      'leaving wood — your day master — holding just 1 of the 8 positions',
+      'Wood, your day master, holds just 1 of the 8 positions',
     )
   })
 
-  it('frames a weak day master as footing, not size', () => {
+  it('frames a weak day master as support, not identity', () => {
     const text = interpretChart(ny1990).paragraphs[1]
-    expect(text).toContain('Weak describes your footing, not your size')
+    expect(text).toContain('Weak here measures the support you started with')
     expect(text).toContain('you are still the jewel')
   })
 
-  it('keeps the person, not the chart, as the actor in strength copy', () => {
+  it('avoids chart-as-actor and AI-flavored phrasing', () => {
     // Per tone review: the chart describes circumstances; the person acts.
+    // And no stock LLM constructions.
+    const banned = [
+      'the chart works',
+      'charts like this',
+      'Middle-weight charts',
+      'Add it up',
+      "isn't a workaround",
+      'not a verdict',
+    ]
     for (const chart of [bruceLee, ny1990]) {
-      const text = interpretChart(chart).paragraphs[1]
-      expect(text).not.toContain('the chart works')
-      expect(text).not.toContain('charts like this')
-      expect(text).not.toContain('Middle-weight charts')
+      const text = interpretChart(chart).paragraphs.join(' ')
+      for (const phrase of banned) {
+        expect(text).not.toContain(phrase)
+      }
     }
   })
 
@@ -138,7 +147,7 @@ describe('interpretation copy', () => {
           const reading = interpretChart(chart)
           if (reading.missing.length === 0 && reading.dominant.length === 0) {
             expect(reading.extreme).toBe(false)
-            expect(reading.paragraphs[0]).toContain('All five elements show up in your chart')
+            expect(reading.paragraphs[0]).toContain('All five elements are present in your chart')
             found = true
             break outer
           }

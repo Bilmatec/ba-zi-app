@@ -51,16 +51,16 @@ const DAY_MASTER_NOUN: Record<string, string> = {
 
 /** Traditional imagery for each day master stem, keyed by Chinese character. */
 const DAY_MASTER_IMAGERY: Record<string, string> = {
-  甲: 'a tall tree — upright, steady growth that does not like being bent',
-  乙: 'grass and climbing vines — flexible growth that finds a way around obstacles',
-  丙: 'the sun — warmth radiated openly and at scale',
-  丁: 'a candle or hearth — contained warmth, focused and close-up',
-  戊: 'a mountain — broad, load-bearing, slow to move',
-  己: 'garden soil — quiet ground that grows other things',
-  庚: 'raw ore and the axe — direct force that cuts first and polishes later',
-  辛: 'refined metal and jewelry — precision, edge, and finish',
-  壬: 'a river or the sea — momentum that carries things along with it',
-  癸: 'rain and mist — subtle water that soaks in everywhere',
+  甲: 'a tall tree, growing upward at its own steady pace',
+  乙: 'grass and climbing vines, growth that bends around whatever is in the way',
+  丙: 'the sun, warmth that reaches everyone at once',
+  丁: 'a candle or a hearth, warmth kept close and steady',
+  戊: 'a mountain, broad and slow to move, able to carry weight',
+  己: 'garden soil, the quiet ground other things grow in',
+  庚: 'raw ore and the axe, force applied directly',
+  辛: 'refined metal and jewelry, exact and finished',
+  壬: 'a river or the sea, water with momentum behind it',
+  癸: 'rain and mist, water that soaks in quietly',
 }
 
 export type Strength = 'strong' | 'weak' | 'balanced'
@@ -162,7 +162,7 @@ function balanceParagraph(
     const verb = names.length === 1 ? 'dominates' : 'dominate'
     if (dmOutnumbered) {
       sentences.push(
-        `${lead} ${verb} everything else, leaving ${lower(dayMaster)} — your day master — holding just ${counts[dayMaster]} of the ${total} positions.`,
+        `${lead} ${verb} everything else. ${capitalize(lower(dayMaster))}, your day master, holds just ${counts[dayMaster]} of the ${total} positions.`,
       )
     } else {
       sentences.push(`${lead} ${verb} everything else.`)
@@ -171,9 +171,9 @@ function balanceParagraph(
     const max = Math.max(...ELEMENTS.map((e) => counts[e]))
     const top = ELEMENTS.filter((e) => counts[e] === max)
     sentences.push(
-      `All five elements show up in your chart, and none of them runs away with it — ${top
-        .map(lower)
-        .join(' and ')} sit${top.length === 1 ? 's' : ''} slightly ahead. A spread like this gives you range: no single element holds the wheel, and no door is closed by default.`,
+      `All five elements are present in your chart, and none takes over. ${capitalize(
+        top.map(lower).join(' and '),
+      )} sit${top.length === 1 ? 's' : ''} slightly ahead. A spread like this gives you range; nothing in the makeup locks you into one way of operating.`,
     )
   }
 
@@ -183,7 +183,7 @@ function balanceParagraph(
     )
   } else if (heavy.length > 0) {
     sentences.push(
-      `That much ${lower(heavy[0].element)} sets the chart's tone: the other elements spend most of their time reacting to it rather than leading.`,
+      `That much ${lower(heavy[0].element)} sets the tone. Everything else has to fit around it.`,
     )
   }
 
@@ -215,12 +215,12 @@ function dayMasterParagraph(
 
   const strengthSentence =
     strength === 'strong'
-      ? `Add it up and your day master leans strong: ${supporters} of your ${total} positions match or feed your element. You have fuel to spend — you'll usually get more from putting yourself out there than from holding back.`
+      ? `With ${supporters} of your ${total} positions matching or feeding your element, your day master comes out strong. You have plenty to draw on, and you can afford to push. For you, holding back usually costs more than acting.`
       : strength === 'weak'
-        ? `Add it up and your day master leans weak: only ${supporters} of your ${total} positions match or feed your element. Weak describes your footing, not your size — you are still ${DAY_MASTER_NOUN[dm.chinese]}, just standing in ground that hands you little for free. In practice, you do your best work with backing: the right people, the right timing, the right ground. Seeking those out isn't a workaround — for you, it's the main road.`
-        : `Add it up and your day master sits near the middle: ${supporters} of your ${total} positions support your element. That middle ground means circumstance gets a vote — the same you can stand stronger or weaker depending on the influences moving through your years.`
+        ? `Only ${supporters} of your ${total} positions match or feed your element, so your day master comes out weak. Weak here measures the support you started with. It says nothing about what you are made of; you are still ${DAY_MASTER_NOUN[dm.chinese]}. It does mean you get further with help than without it. The people around you, and the timing you choose, will matter more for you than they do for most.`
+        : `With ${supporters} of your ${total} positions behind your element, your day master sits near the middle, neither strong nor weak at birth. The influences that come later, in the periods your life moves through, decide which way you tip. Those change over time.`
 
-  return `You are ${dm.pinyin} — ${dm.polarity.toLowerCase()} ${dmName}, traditionally pictured as ${imagery}. ${seasonSentence} ${strengthSentence}`
+  return `Your day master is ${dm.pinyin}, ${dm.polarity.toLowerCase()} ${dmName}. Tradition pictures it as ${imagery}. ${seasonSentence} ${strengthSentence}`
 }
 
 export function interpretChart(chart: ChartResult): Interpretation {
@@ -242,7 +242,7 @@ export function interpretChart(chart: ChartResult): Interpretation {
 
   if (!chart.timeKnown) {
     paragraphs.push(
-      `Your birth hour is unknown, so this balance reads six positions instead of eight. An hour pillar adds one more stem and one more branch — enough to lift a missing element off zero or tip a close balance — so treat the edges of this reading as soft.`,
+      `Your birth hour is unknown, so this reading covers six positions instead of eight. The missing hour pillar would add one more stem and one more branch. That is enough to lift a missing element off zero, or to tip a close balance, so hold the edges of this reading loosely.`,
     )
   }
 
