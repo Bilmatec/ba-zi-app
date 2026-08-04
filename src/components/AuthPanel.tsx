@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
@@ -13,6 +13,17 @@ export default function AuthPanel({ user }: Props) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [open, setOpen] = useState(false)
+
+  // After a successful login, fold the form away (and forget what was typed)
+  // so a later logout shows the quiet collapsed bar, not an open form.
+  useEffect(() => {
+    if (user) {
+      setOpen(false)
+      setEmail('')
+      setPassword('')
+      setMessage('')
+    }
+  }, [user])
 
   if (!supabase) {
     return <div className="auth-note">Accounts aren’t set up yet — charts can’t be saved.</div>

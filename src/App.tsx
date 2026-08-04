@@ -174,10 +174,25 @@ export default function App() {
   useEffect(() => {
     if (!supabase) return
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
-      // Don't carry a "Viewing saved chart" label across a login change.
-      if (!session) setOpenedName('')
+      // Logging out is a privacy action: clear the person's chart and inputs
+      // so nothing personal stays on screen. Only on a real sign-out — not on
+      // the initial page load for a visitor who was never logged in.
+      if (event === 'SIGNED_OUT') {
+        setChart(null)
+        setLuck(null)
+        setLastInput(null)
+        setOpenedName('')
+        setError('')
+        setDate('')
+        setTime('')
+        setTimeUnknown(false)
+        setGender('')
+        setPlaceQuery('')
+        setPlace(null)
+        setPlaceResults([])
+      }
     })
     return () => sub.subscription.unsubscribe()
   }, [])
