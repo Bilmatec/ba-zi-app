@@ -404,3 +404,77 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+/* --- Interpretation --- */
+
+.interpretation {
+  margin-top: 2rem;
+}
+
+.element-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.element-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 5.5rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.element-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.element-track {
+  height: 1.1rem;
+  border-radius: 6px;
+  background: #eceae2;
+  overflow: hidden;
+}
+
+.element-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.element-count {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.element-count em {
+  font-style: normal;
+  color: #a5321f;
+  font-weight: 600;
+}
+
+.element-note {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.reading {
+  padding: 1.1rem 1.3rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  line-height: 1.6;
+}
+
+.reading p {
+  margin: 0 0 0.9rem;
+}
+
+.reading p:last-child {
+  margin-bottom: 0;
+}
+
+.reading-extreme {
+  border-left: 5px solid #a5321f;
+}

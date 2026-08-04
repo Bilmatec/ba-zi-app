@@ -11,6 +11,7 @@ import { supabase } from './lib/supabase'
 import { saveChart, type SavedChartRow } from './lib/charts-store'
 import AuthPanel from './components/AuthPanel'
 import SavedCharts from './components/SavedCharts'
+import Interpretation from './components/Interpretation'
 import './App.css'
 
 type SavableInput = BirthInput & { placeLabel: string }
@@ -338,6 +339,7 @@ export default function App() {
         </div>
       )}
       {chart && <ChartView chart={chart} />}
+      {chart && <Interpretation chart={chart} />}
       {chart && lastInput && user && (
         <SaveChartBox input={lastInput} onSaved={() => setSavedRefresh((n) => n + 1)} />
       )}
