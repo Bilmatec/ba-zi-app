@@ -105,6 +105,18 @@ describe('interpretation copy', () => {
     expect(text).toContain('you are still the jewel')
   })
 
+  it('uses "an" before earth months', () => {
+    // Bruce Lee was born in a 亥 (water) month; use an earth-month birth here.
+    // 31 Oct 1968 falls in the 戌 (earth) month.
+    const chart = calculateChart({
+      year: 1968, month: 10, day: 31, hour: 16, minute: 26,
+      timeZone: 'America/New_York', gender: 'male',
+    })
+    const text = interpretChart(chart).paragraphs[1]
+    expect(text).toContain('Born in an earth month')
+    expect(text).not.toContain('a earth')
+  })
+
   it('avoids chart-as-actor and AI-flavored phrasing', () => {
     // Per tone review: the chart describes circumstances; the person acts.
     // And no stock LLM constructions.

@@ -201,17 +201,19 @@ function dayMasterParagraph(
   const dmName = lower(dm.element)
   const monthName = lower(chart.monthPillar.branch.element)
   const imagery = DAY_MASTER_IMAGERY[dm.chinese]
+  // "an earth month" but "a fire month" — pick the article by vowel sound.
+  const inMonth = `Born in ${/^[aeiou]/.test(monthName) ? 'an' : 'a'} ${monthName} month`
 
   const seasonSentence =
     relation === 'same'
-      ? `Born in a ${monthName} month, you hold the season — your element is at home in it.`
+      ? `${inMonth}, you hold the season — your element is at home in it.`
       : relation === 'feeds'
-        ? `Born in a ${monthName} month, the season feeds you: ${monthName} gives rise to ${dmName} in the cycle.`
+        ? `${inMonth}, the season feeds you: ${monthName} gives rise to ${dmName} in the cycle.`
         : relation === 'drains'
-          ? `Born in a ${monthName} month, the season draws on you: ${dmName} spends itself producing ${monthName}.`
+          ? `${inMonth}, the season draws on you: ${dmName} spends itself producing ${monthName}.`
           : relation === 'opposes'
-            ? `Born in a ${monthName} month, the season pushes against you: ${monthName} keeps ${dmName} in check.`
-            : `Born in a ${monthName} month, the season answers to you — ${dmName} controls ${monthName} — though holding that ground takes effort.`
+            ? `${inMonth}, the season pushes against you: ${monthName} keeps ${dmName} in check.`
+            : `${inMonth}, the season answers to you — ${dmName} controls ${monthName} — though holding that ground takes effort.`
 
   const strengthSentence =
     strength === 'strong'
