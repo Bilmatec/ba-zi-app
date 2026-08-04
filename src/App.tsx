@@ -12,6 +12,8 @@ import { saveChart, type SavedChartRow } from './lib/charts-store'
 import AuthPanel from './components/AuthPanel'
 import SavedCharts from './components/SavedCharts'
 import Interpretation from './components/Interpretation'
+import stillLifeImg from './assets/props-stilllife.png'
+import portraitImg from './assets/portrait-candid.png'
 import './App.css'
 
 type SavableInput = BirthInput & { placeLabel: string }
@@ -250,10 +252,62 @@ export default function App() {
 
   return (
     <main className="app">
-      <header className="app-header">
-        <h1>Ba Zi — Four Pillars Chart</h1>
+      <nav className="topbar">
+        <span className="wordmark">Ba Zi · Four Pillars</span>
         <AuthPanel user={user} />
+      </nav>
+
+      <header className="hero">
+        <img className="hero-bg" src={stillLifeImg} alt="" />
+        <div className="hero-inner">
+          <div className="hero-text">
+            <span className="eyebrow">Ba Zi · four pillars of destiny</span>
+            <h1>Luck isn&apos;t random. It&apos;s a resource you can manage.</h1>
+            <p>
+              Ba Zi reads the exact moment you were born to show your natural strengths, where the
+              friction tends to come from, and where you sit in your current luck cycle —
+              resource-rich or resource-scarce — so you know when to push and when to conserve.
+              Yours takes under a minute to see.
+            </p>
+            <div className="pillar-strip" aria-hidden="true">
+              <div className="pillar-mini">戊<br />申</div>
+              <div className="pillar-mini">壬<br />戌</div>
+              <div className="pillar-mini">甲<br />戌</div>
+              <div className="pillar-mini">壬<br />申</div>
+            </div>
+            <p className="img-note">↑ this is what your chart will look like</p>
+          </div>
+          <img
+            className="hero-portrait"
+            src={portraitImg}
+            alt="Someone smiling while writing their birth details at a sunlit desk"
+          />
+        </div>
       </header>
+
+      <section className="benefit-cards">
+        <div className="benefit-card">
+          <p className="benefit-title">Who you are</p>
+          <p className="benefit-sub">Your core personality, from the moment you were born</p>
+        </div>
+        <div className="benefit-card">
+          <p className="benefit-title">Where the friction is</p>
+          <p className="benefit-sub">Which elements dominate, and which are missing</p>
+        </div>
+        <div className="benefit-card">
+          <p className="benefit-title">Your current resource level</p>
+          <p className="benefit-sub">Where you sit in your luck cycle right now</p>
+        </div>
+      </section>
+
+      <div className="chip-row">
+        <span className="chip">🕒 Compatibility readings — coming soon</span>
+        <span className="chip">📍 How your current location fits your chart — coming soon</span>
+      </div>
+
+      <h2 className="form-heading" id="get-your-chart">
+        See your chart
+      </h2>
       <p className="tagline">
         Enter your birth details to calculate your Four Pillars of Destiny chart.
       </p>

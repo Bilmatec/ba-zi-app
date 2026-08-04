@@ -1,23 +1,198 @@
-/* Phase 1: deliberately minimal styling — visual design comes in a later phase. */
+/* Palette and layout per Visual_Reference_Mockups.html (locked Aug 3). */
+
+:root {
+  --yellow: #fff200;
+  --ink: #231f20;
+  --navy: #12213b;
+  --ember: #a5321f;
+  --paper: #f7f5ef;
+  --gold: #c9992a;
+  --surface: #ffffff;
+  --muted: #6b6b68;
+  --border: #e4e1d8;
+}
 
 .app {
-  max-width: 760px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 2rem 1rem 4rem;
-  font-family: system-ui, sans-serif;
-  color: #231f20;
+  padding: 1rem 1rem 4rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
 }
 
-.app h1 {
-  margin-bottom: 0.25rem;
+h1,
+h2,
+.wordmark {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 
-.app-header {
+/* --- Top bar --- */
+
+.topbar {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.4rem 0 1rem;
+}
+
+.wordmark {
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+/* --- Hero --- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--navy);
+  border-radius: 12px;
+  color: var(--paper);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.16;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 2rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  background: var(--paper);
+  color: var(--navy);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.hero h1 {
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.hero p {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 0 16px;
+  opacity: 0.92;
+}
+
+.pillar-strip {
+  display: flex;
+  gap: 4px;
+}
+
+.pillar-mini {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 6px 9px;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.img-note {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  font-style: italic;
+  margin: 8px 0 0;
+}
+
+.hero-portrait {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 700px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+
+  .hero-portrait {
+    order: -1;
+  }
+}
+
+/* --- Benefit cards and coming-soon chips --- */
+
+.benefit-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .benefit-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.benefit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.benefit-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.benefit-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 3px 0 0;
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.form-heading {
+  margin: 2.25rem 0 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 500;
 }
 
 /* --- Accounts --- */
