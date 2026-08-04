@@ -215,10 +215,10 @@ function dayMasterParagraph(
 
   const strengthSentence =
     strength === 'strong'
-      ? `Add it up and your day master leans strong: ${supporters} of your ${total} positions match or feed your element. A strong day master has fuel to spend, and charts like this tend to reward output more than caution.`
+      ? `Add it up and your day master leans strong: ${supporters} of your ${total} positions match or feed your element. You have fuel to spend — you'll usually get more from putting yourself out there than from holding back.`
       : strength === 'weak'
-        ? `Add it up and your day master leans weak: only ${supporters} of your ${total} positions match or feed your element. Weak describes your footing, not your size — you are still ${DAY_MASTER_NOUN[dm.chinese]}, just standing in ground that hands you little for free. Charts like this run on backing: the right people, the right timing, the right ground. When those line up, the chart works.`
-        : `Add it up and your day master sits near the middle: ${supporters} of your ${total} positions support your element. Middle-weight charts move with circumstance — the balance tips one way or the other depending on the years you're moving through.`
+        ? `Add it up and your day master leans weak: only ${supporters} of your ${total} positions match or feed your element. Weak describes your footing, not your size — you are still ${DAY_MASTER_NOUN[dm.chinese]}, just standing in ground that hands you little for free. In practice, you do your best work with backing: the right people, the right timing, the right ground. Seeking those out isn't a workaround — for you, it's the main road.`
+        : `Add it up and your day master sits near the middle: ${supporters} of your ${total} positions support your element. That middle ground means circumstance gets a vote — the same you can stand stronger or weaker depending on the influences moving through your years.`
 
   return `You are ${dm.pinyin} — ${dm.polarity.toLowerCase()} ${dmName}, traditionally pictured as ${imagery}. ${seasonSentence} ${strengthSentence}`
 }

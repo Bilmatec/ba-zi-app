@@ -105,6 +105,16 @@ describe('interpretation copy', () => {
     expect(text).toContain('you are still the jewel')
   })
 
+  it('keeps the person, not the chart, as the actor in strength copy', () => {
+    // Per tone review: the chart describes circumstances; the person acts.
+    for (const chart of [bruceLee, ny1990]) {
+      const text = interpretChart(chart).paragraphs[1]
+      expect(text).not.toContain('the chart works')
+      expect(text).not.toContain('charts like this')
+      expect(text).not.toContain('Middle-weight charts')
+    }
+  })
+
   it('speaks in second person and never in clinical third person', () => {
     for (const chart of [bruceLee, ny1990]) {
       const text = interpretChart(chart).paragraphs.join(' ')
