@@ -7,9 +7,10 @@ interface Props {
 }
 
 export default function AuthPanel({ user }: Props) {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [open, setOpen] = useState(false)
@@ -19,8 +20,10 @@ export default function AuthPanel({ user }: Props) {
   useEffect(() => {
     if (user) {
       setOpen(false)
+      setMode('signin')
       setEmail('')
       setPassword('')
+      setShowPassword(false)
       setMessage('')
     }
   }, [user])
@@ -60,7 +63,15 @@ export default function AuthPanel({ user }: Props) {
     setMessage('')
     setBusy(true)
     try {
-      if (mode === 'signup') {
+      if (mode === 'reset') {
+        const { error } = await supabase!.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        })
+        if (error) throw error
+        setMessage(
+          'If an account exists for that email, a reset link is on its way. Open it on this device and you can choose a new password.',
+        )
+      } else if (mode === 'signup') {
         const { data, error } = await supabase!.auth.signUp({ email, password })
         if (error) throw error
         if (!data.session) {
@@ -95,6 +106,13 @@ export default function AuthPanel({ user }: Props) {
           Sign up
         </button>
       </div>
+
+      {mode === 'reset' && (
+        <p className="auth-note">
+          Enter your account&apos;s email and we&apos;ll send you a link to set a new password.
+        </p>
+      )}
+
       <label>
         Email
         <input
@@ -105,23 +123,120 @@ export default function AuthPanel({ user }: Props) {
           required
         />
       </label>
-      <label>
-        Password
-        <input
-          type="password"
-          value={password}
-          autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
-          required
-        />
-      </label>
+
+      {mode !== 'reset' && (
+        <label>
+          Password
+          <span className="pw-wrap">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              className={`pw-eye${showPassword ? ' pw-eye-on' : ''}`}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((s) => !s)}
+            >
+              👁
+            </button>
+          </span>
+        </label>
+      )}
+
       <div className="auth-actions">
         <button type="submit" className="submit" disabled={busy}>
-          {busy ? 'Working…' : mode === 'signup' ? 'Create account' : 'Log in'}
+          {busy
+            ? 'Working…'
+            : mode === 'reset'
+              ? 'Send reset link'
+              : mode === 'signup'
+                ? 'Create account'
+                : 'Log in'}
         </button>
         <button type="button" className="auth-link" onClick={() => setOpen(false)}>
           Cancel
+        </button>
+      </div>
+
+      {mode === 'signin' && (
+        <button type="button" className="auth-link auth-forgot" onClick={() => { setMode('reset'); setMessage('') }}>
+          Forgot password?
+        </button>
+      )}
+      {mode === 'reset' && (
+        <button type="button" className="auth-link auth-forgot" onClick={() => { setMode('signin'); setMessage('') }}>
+          Back to log in
+        </button>
+      )}
+
+      {message && <div className="auth-message">{message}</div>}
+    </form>
+  )
+}
+
+/**
+ * Shown when the page was opened from a password-reset email link: the person
+ * is signed in through the link's temporary session and chooses a new password.
+ */
+export function RecoveryPanel({ onDone }: { onDone: () => void }) {
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState('')
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setMessage('')
+    setBusy(true)
+    try {
+      const { error } = await supabase!.auth.updateUser({ password })
+      if (error) throw error
+      setMessage('Password updated — you are logged in.')
+      setTimeout(onDone, 1500)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Something went wrong.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form className="auth-form recovery-panel" onSubmit={submit}>
+      <p className="auth-note">
+        You followed a password-reset link. Choose a new password for your account:
+      </p>
+      <label>
+        New password
+        <span className="pw-wrap">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            autoComplete="new-password"
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={6}
+            required
+            autoFocus
+          />
+          <button
+            type="button"
+            className={`pw-eye${showPassword ? ' pw-eye-on' : ''}`}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((s) => !s)}
+          >
+            👁
+          </button>
+        </span>
+      </label>
+      <div className="auth-actions">
+        <button type="submit" className="submit" disabled={busy}>
+          {busy ? 'Saving…' : 'Set new password'}
         </button>
       </div>
       {message && <div className="auth-message">{message}</div>}

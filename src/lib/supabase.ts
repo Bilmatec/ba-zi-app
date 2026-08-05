@@ -8,6 +8,15 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
 
+/**
+ * True when this page load came from a password-reset email link. Captured
+ * synchronously at module load, before the auth client processes (and strips)
+ * the URL fragment — the app uses it to show the set-new-password panel even
+ * though the fragment is gone by the time components mount.
+ */
+export const openedViaRecoveryLink =
+  typeof window !== 'undefined' && window.location.hash.includes('type=recovery')
+
 /** Null until Supabase is configured — the UI degrades gracefully. */
 export const supabase: SupabaseClient | null =
   url && anonKey ? createClient(url, anonKey) : null

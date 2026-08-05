@@ -298,6 +298,50 @@ h2,
   font-size: 0.95rem;
 }
 
+.pw-wrap {
+  position: relative;
+  display: block;
+}
+
+.pw-wrap input {
+  width: 100%;
+  padding-right: 2.3rem;
+}
+
+.pw-eye {
+  position: absolute;
+  right: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  padding: 0.15rem 0.3rem;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.45;
+  border-radius: 5px;
+}
+
+.pw-eye:hover {
+  opacity: 0.75;
+}
+
+.pw-eye-on {
+  opacity: 1;
+  background: #f2f0e8;
+}
+
+.auth-forgot {
+  align-self: flex-start;
+  font-size: 0.82rem;
+}
+
+.recovery-panel {
+  max-width: 420px;
+  margin: 0 0 1rem;
+  border-left: 3px solid var(--gold);
+}
+
 .auth-tabs {
   display: flex;
   gap: 0.5rem;

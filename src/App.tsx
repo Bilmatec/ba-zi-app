@@ -8,11 +8,11 @@ import {
 } from './lib/bazi/calculate'
 import { searchPlaces, placeLabel, type PlaceResult } from './lib/geo'
 import { calculateLuck, type LuckTimeline } from './lib/bazi/luck'
-import { supabase } from './lib/supabase'
+import { supabase, openedViaRecoveryLink } from './lib/supabase'
 import { saveChart, type SavedChartRow } from './lib/charts-store'
 import LuckPillars from './components/LuckPillars'
 import DetailedReading from './components/DetailedReading'
-import AuthPanel from './components/AuthPanel'
+import AuthPanel, { RecoveryPanel } from './components/AuthPanel'
 import SavedCharts from './components/SavedCharts'
 import Interpretation from './components/Interpretation'
 import stillLifeImg from './assets/props-stilllife.png'
@@ -170,6 +170,7 @@ export default function App() {
 
   const [user, setUser] = useState<User | null>(null)
   const [savedRefresh, setSavedRefresh] = useState(0)
+  const [recovering, setRecovering] = useState(openedViaRecoveryLink)
 
   // Track login state.
   useEffect(() => {
@@ -304,6 +305,8 @@ export default function App() {
         <span className="wordmark">Ba Zi · Four Pillars</span>
         <AuthPanel user={user} />
       </nav>
+
+      {recovering && user && <RecoveryPanel onDone={() => setRecovering(false)} />}
 
       <header className="hero">
         <img className="hero-bg" src={stillLifeImg} alt="" />
