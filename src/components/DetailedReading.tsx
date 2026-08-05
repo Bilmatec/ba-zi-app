@@ -15,7 +15,7 @@ import {
 } from '../lib/bazi/detail'
 import { interpretChart, roleOf, ELEMENTS, type Strength } from '../lib/bazi/interpret'
 import { STEMS, BRANCHES, type Element } from '../lib/bazi/data'
-import { annualReport, clashPartner, type AnnualReport } from '../lib/bazi/annual'
+import { annualReport, clashPartner, harmPartner, type AnnualReport } from '../lib/bazi/annual'
 import { isUnlocked, unlockDetailed } from '../lib/unlock'
 
 const ELEMENT_COLORS: Record<Element, string> = {
@@ -123,13 +123,118 @@ function favorableParagraph(
   return `Because your day master runs strong, more feeding is the one thing you don't need — what serves you are outlets: opportunity, pressure, and expression. ${favPart}${unfavPart}`
 }
 
-function annualLead(annual: AnnualReport): string {
-  const yearName = `${annual.branch.animal}`
-  if (annual.clashes.length === 0) {
-    return `In plain terms: this ${yearName} year doesn't collide with anything you carry — its themes arrive gently, and the steering stays in your hands.`
+/** Which part of life each natal pillar position stands for. */
+const DOMAIN: Record<string, string> = {
+  'year branch': 'family, elders, and your standing in the wider world',
+  'month branch': 'work and career',
+  'day branch': 'yourself and your closest partner',
+  'hour branch': 'children, aspirations, and the road ahead',
+}
+
+interface AnnualCopy {
+  lead: string
+  narrative: string
+  mechanics: string
+}
+
+function buildAnnualReading(
+  annual: AnnualReport,
+  stemGod: TenGod,
+  strength: Strength,
+  timeKnown: boolean,
+): AnnualCopy {
+  const animal = annual.branch.animal
+  const natalClash = annual.clashes.filter((c) => !c.isLuckPillar)
+  const natalHarm = annual.harms.filter((c) => !c.isLuckPillar)
+  const luckClash = annual.clashes.some((c) => c.isLuckPillar)
+  const luckHarm = annual.harms.some((c) => c.isLuckPillar)
+  const bladeActive = annual.bloodBlade.activeVia.length > 0
+  const hitLocations = [...new Set([...natalClash, ...natalHarm].map((h) => h.location))]
+  const domains = hitLocations.map((l) => DOMAIN[l])
+
+  // --- Lead: which part of life the year leans into ---
+  let lead: string
+  if (hitLocations.length === 0 && !luckClash && !luckHarm && !bladeActive) {
+    lead = `In plain terms: this ${animal} year is a quiet passage for you — nothing in it pushes against what you carry, and the steering stays in your hands.`
+  } else if (hitLocations.length === 0 && (luckClash || luckHarm)) {
+    lead = `In plain terms: this ${animal} year moves the backdrop more than the foreground — it ${luckClash ? 'meets the decade you are in head-on' : 'rubs gently against the decade you are in'}, so the overall weather of these years shifts while your own corners stay steady.`
+  } else if (hitLocations.length === 1) {
+    const hasClashHere = natalClash.length > 0
+    lead = hasClashHere
+      ? `In plain terms: this ${animal} year leans into ${domains[0]}. Expect real movement there — plans reshuffle, stuck things come loose, and directions can change. That makes it an important year in that corner of life, not a bad one.`
+      : `In plain terms: this ${animal} year leans gently on ${domains[0]} — nothing dramatic, just a place where patience and a slower yes will serve you well.`
+  } else if (hitLocations.length > 1) {
+    lead = `In plain terms: this ${animal} year touches several parts of your life lightly — ${listJoin(domains)} — rather than leaning hard into one.`
+  } else {
+    // only the blade is active
+    lead = `In plain terms: this ${animal} year passes through your chart quietly, with one practical note about physical care woven in below.`
   }
-  const where = listJoin(annual.clashes.map((c) => c.location))
-  return `In plain terms: this ${yearName} year runs directly across your ${where} — which marks it as a year of significant movement. Plans reshuffle, stuck things come loose, and directions can change. That makes it an important year, not a bad one.`
+
+  // --- Narrative: identity + role, then lean-into / watch-for, woven ---
+  const parts: string[] = []
+  parts.push(
+    `${annual.calendarYear} runs as ${annual.stem.chinese}${annual.branch.chinese} (${annual.stem.pinyin} ${annual.branch.pinyin} — ${annual.stem.polarity.toLowerCase()} ${annual.stem.element.toLowerCase()} over the ${animal}), and toward your day master it plays ${stemGod.english} (${stemGod.chinese}) — ${CATEGORY_LABEL[stemGod.category]}.`,
+  )
+  const rule = favorableCategories(strength)
+  if (!rule) {
+    parts.push(`With your day master near the middle, what matters more than the year's role is where the year lands.`)
+  } else if (rule.favorable.includes(stemGod.category)) {
+    parts.push(
+      strength === 'weak'
+        ? `For a lightly backed chart like yours, that makes it a giving year — one that feeds your footing, and worth asking more of.`
+        : `For a well-fueled chart like yours, that makes it an outlet year — somewhere for your surplus to go. Push.`,
+    )
+  } else {
+    parts.push(
+      strength === 'weak'
+        ? `For a lightly backed chart like yours, that makes it a spending year — it will put you to work, so pace the bigger pushes.`
+        : `For a well-fueled chart like yours, that makes it a feeding year — more supply than you strictly need; spend it rather than store it.`,
+    )
+  }
+  if (natalClash.length > 0) {
+    const clashDomains = [...new Set(natalClash.map((c) => DOMAIN[c.location]))]
+    parts.push(
+      `Lean into the movement: if something around ${listJoin(clashDomains)} has felt stuck, this is a year it can come loose — changes of direction, fresh starts, and overdue decisions all come easier.`,
+    )
+  }
+  if (natalHarm.length > 0 || luckHarm) {
+    parts.push(
+      `What to watch for is quieter: give commitments and the people close to you a little more patience this year. Agreements reward a second read, and a slower yes costs less than a fast one.`,
+    )
+  }
+  if (luckClash) {
+    parts.push(
+      `The backdrop moves too: the year meets your current decade head-on, so expect the overall feel of these years to shift, not just one corner of them.`,
+    )
+  }
+  if (bladeActive) {
+    parts.push(
+      `One practical note: ${listJoin(annual.bloodBlade.activeVia)} carr${annual.bloodBlade.activeVia.length > 1 ? 'y' : 'ies'} your chart's blood-blade marker, a traditional flag for cuts, bruises, and procedures. Nothing is foretold; it simply favors a little extra care with sharp tools, driving, and rough physical activity — and if elective surgery is ever a matter of choosing a window, this wouldn't be the one to pick first.`,
+    )
+  }
+  if (hitLocations.length === 0 && !luckClash && !luckHarm && !bladeActive) {
+    parts.push(
+      `With nothing pulling at the chart, the year rewards building: the decade reading above stays the main story, and this year simply carries it along.`,
+    )
+  }
+
+  // --- Mechanics: one shared block, not one per phenomenon ---
+  const clashResult =
+    annual.clashes.length === 0
+      ? 'it meets none of them'
+      : `it meets your ${listJoin(annual.clashes.map((c) => c.location))}`
+  const harmResult =
+    annual.harms.length === 0
+      ? 'none of yours is involved'
+      : `it touches your ${listJoin(annual.harms.map((c) => c.location))}`
+  const bladeResult =
+    annual.bloodBlade.activeVia.length === 0
+      ? 'not carried by this year or your current decade'
+      : `carried by ${listJoin(annual.bloodBlade.activeVia)}`
+  const mechanics =
+    `For anyone who wants the gears: the Ba Zi year turns at Lìchūn in early February, not on January 1${annual.beforeLichun ? " — which is why the previous year's pillar is still the one running right now" : ''}. Three checks sit behind the reading above, all against your ${timeKnown ? 'four' : 'three'} birth branches plus your current decade. Clash (冲), each branch's direct opposite — this year the ${animal} opposes the ${BRANCHES[clashPartner(annual.branch.chinese)].animal}: ${clashResult}. Harm (害), a softer pairing traditionally read as friction in bonds — this year pairing the ${animal} with the ${BRANCHES[harmPartner(annual.branch.chinese)].animal}: ${harmResult}. Blood blade (血刃), fixed for life by your birth month's branch (yours: the ${annual.bloodBlade.monthBranch.animal}, triggered by the ${annual.bloodBlade.trigger.animal}): ${bladeResult}.`
+
+  return { lead, narrative: parts.join(' '), mechanics }
 }
 
 function decadeLead(
@@ -243,7 +348,12 @@ export default function DetailedReading({
 
   const categoryCounts = castCategoryCounts(detail.tenGods)
   const annual = annualReport(chart, luck)
-  const annualPartner = BRANCHES[clashPartner(annual.branch.chinese)]
+  const annualCopy = buildAnnualReading(
+    annual,
+    tenGodOf(dm, annual.stem),
+    reading.strength,
+    chart.timeKnown,
+  )
   const current = luck.currentIndex >= 0 ? luck.periods[luck.currentIndex] : null
   const currentStemGod = current ? tenGodOf(dm, current.stem) : null
   const currentBranchGod = current
@@ -391,20 +501,10 @@ export default function DetailedReading({
         </>
       )}
 
-      <h3>This year: the annual pillar</h3>
-      <p className="section-lead">{annualLead(annual)}</p>
-      <p>
-        {`The mechanics: ${annual.calendarYear} runs as ${annual.stem.chinese}${annual.branch.chinese} (${annual.stem.pinyin} ${annual.branch.pinyin} — ${annual.stem.polarity.toLowerCase()} ${lower(annual.stem.element)} over the ${annual.branch.animal}). In Ba Zi the year turns at Lìchūn in early February, not on January 1${annual.beforeLichun ? ` — which is why, right now, the previous year's pillar is still the one running` : ''}. Each branch has one direct opposite, six steps across the cycle, and a year whose branch meets its opposite in a chart is called a clash (冲) — traditionally read as movement and a change of direction, not as an omen. This ${annual.branch.animal} year's opposite is the ${annualPartner.animal}. Checked against your ${chart.timeKnown ? 'four' : 'three'} birth branches and your current decade: `}
-        {annual.clashes.length === 0
-          ? `no clashes — the year passes through without meeting an opposite, so its themes blend in rather than shake things.`
-          : annual.clashes
-              .map((c) =>
-                c.isLuckPillar
-                  ? `the year meets your current decade's ${c.branch.animal} head-on — movement at the decade level, where the backdrop of these years itself shifts`
-                  : `the year meets the ${c.branch.animal} in your ${c.location} head-on, so the movement centers there`,
-              )
-              .join('; ') + `.`}
-      </p>
+      <h3>This year</h3>
+      <p className="section-lead">{annualCopy.lead}</p>
+      <p>{annualCopy.narrative}</p>
+      <p className="element-note">{annualCopy.mechanics}</p>
     </div>
   )
 
