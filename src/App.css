@@ -914,7 +914,17 @@ h2,
 .hidden-label {
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.hidden-domain {
+  font-size: 0.7rem;
+  color: var(--muted);
   margin-bottom: 0.4rem;
+}
+
+.tengod-pos em {
+  font-style: normal;
+  color: var(--gold);
 }
 
 .hidden-stems {

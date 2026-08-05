@@ -131,6 +131,14 @@ const DOMAIN: Record<string, string> = {
   'hour branch': 'children, aspirations, and the road ahead',
 }
 
+/** Compact domain labels for cards and table rows. */
+const DOMAIN_SHORT: Record<string, string> = {
+  Year: 'family & standing',
+  Month: 'work & career',
+  Day: 'you & partner',
+  Hour: 'children & aspirations',
+}
+
 interface AnnualCopy {
   lead: string
   narrative: string
@@ -218,19 +226,26 @@ function buildAnnualReading(
     )
   }
 
-  // --- Mechanics: one shared block, not one per phenomenon ---
+  // --- Mechanics: one shared block, not one per phenomenon. Each check names
+  // its life-domain consequence and points back at the sentence it produced,
+  // so the "receipt" stays readable without memorizing pillar meanings. ---
+  const whereIs = (c: (typeof annual.clashes)[number]) =>
+    c.isLuckPillar
+      ? `your current decade — the backdrop of these years`
+      : `your ${c.location}, the part of your chart about ${DOMAIN[c.location]}`
+  const clashAnimal = BRANCHES[clashPartner(annual.branch.chinese)].animal
   const clashResult =
     annual.clashes.length === 0
-      ? 'it meets none of them'
-      : `it meets your ${listJoin(annual.clashes.map((c) => c.location))}`
+      ? `your chart carries no ${clashAnimal} for it to meet, so no movement flag is raised`
+      : `it meets ${listJoin(annual.clashes.map(whereIs))} — that opposition is where the movement in the reading above comes from`
   const harmResult =
     annual.harms.length === 0
       ? 'none of yours is involved'
-      : `it touches your ${listJoin(annual.harms.map((c) => c.location))}`
+      : `it touches ${listJoin(annual.harms.map(whereIs))} — the source of the patience note above`
   const bladeResult =
     annual.bloodBlade.activeVia.length === 0
-      ? 'not carried by this year or your current decade'
-      : `carried by ${listJoin(annual.bloodBlade.activeVia)}`
+      ? 'not carried by this year or your current decade, so it stays dormant'
+      : `carried by ${listJoin(annual.bloodBlade.activeVia)} — the reason for the practical-care note above`
   const mechanics =
     `For anyone who wants the gears: the Ba Zi year turns at Lìchūn in early February, not on January 1${annual.beforeLichun ? " — which is why the previous year's pillar is still the one running right now" : ''}. Three checks sit behind the reading above, all against your ${timeKnown ? 'four' : 'three'} birth branches plus your current decade. Clash (冲), each branch's direct opposite — this year the ${animal} opposes the ${BRANCHES[clashPartner(annual.branch.chinese)].animal}: ${clashResult}. Harm (害), a softer pairing traditionally read as friction in bonds — this year pairing the ${animal} with the ${BRANCHES[harmPartner(annual.branch.chinese)].animal}: ${harmResult}. Blood blade (血刃), fixed for life by your birth month's branch (yours: the ${annual.bloodBlade.monthBranch.animal}, triggered by the ${annual.bloodBlade.trigger.animal}): ${bladeResult}.`
 
@@ -393,6 +408,7 @@ export default function DetailedReading({
             <div className="hidden-label">
               {hp.label} · {hp.branch}
             </div>
+            <div className="hidden-domain">{DOMAIN_SHORT[hp.label]}</div>
             <div className="hidden-stems">
               {hp.hidden.map((s, i) => (
                 <span className="hidden-stem" key={i}>
@@ -410,7 +426,7 @@ export default function DetailedReading({
             .map((e) => {
               const holders = detail.hiddenPillars
                 .filter((hp) => hp.hidden.some((s) => s.element === e))
-                .map((hp) => `${hp.label.toLowerCase()} branch`)
+                .map((hp) => `${hp.label.toLowerCase()} branch (${DOMAIN_SHORT[hp.label]})`)
               return `${e} shows nowhere on your chart's surface, but it is not gone: it hides in your ${holders.join(' and ')}.`
             })
             .join(' ')}{' '}
@@ -456,12 +472,18 @@ export default function DetailedReading({
         How this works: every character in your chart plays one of ten classical roles relative to
         your day master — the Ten Gods. Ten roles exist; your chart casts only some of them, and
         repetition is part of the reading. These roles come from your birth chart, so they are
-        lifelong — they do not change as the decades turn. The full cast, role by role:
+        lifelong — they do not change as the decades turn. Where a role sits matters too: the year
+        position speaks to family and your standing in the world, the month to work and career,
+        the day to you and your closest partner, and the hour to children and the road ahead. The
+        full cast, role by role:
       </p>
       <ul className="tengod-list">
         {detail.tenGods.map((t, i) => (
           <li key={i}>
-            <span className="tengod-pos">{t.position}</span>
+            <span className="tengod-pos">
+              {t.position}
+              <em> · {DOMAIN_SHORT[t.position.split(' ')[0]]}</em>
+            </span>
             <span className="tengod-stem">
               {t.stem.chinese} {t.stem.pinyin}
             </span>
