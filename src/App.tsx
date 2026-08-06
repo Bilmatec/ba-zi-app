@@ -312,7 +312,22 @@ export default function App() {
         <img className="hero-bg" src={stillLifeImg} alt="" />
         <div className="hero-inner">
           <div className="hero-text">
-            <span className="eyebrow">Ba Zi · four pillars of destiny</span>
+            <span className="label-with-tip eyebrow-row">
+              <span className="eyebrow">Ba Zi · four pillars of destiny</span>
+              <span
+                className="info-tip info-tip-hero"
+                tabIndex={0}
+                role="note"
+                aria-label="What is Ba Zi?"
+              >
+                ⓘ
+                <span className="info-tip-bubble">
+                  Ba Zi (&apos;eight characters&apos;) is an ancient Chinese practice, going back
+                  more than 1,000 years, for calculating and interpreting a birth chart from the
+                  exact moment someone was born.
+                </span>
+              </span>
+            </span>
             <h1>Luck isn&apos;t random. It&apos;s a resource you can manage.</h1>
             <p>
               Ba Zi reads the exact moment you were born to show your natural strengths, where the
@@ -361,6 +376,10 @@ export default function App() {
       </h2>
       <p className="tagline">
         Enter your birth details to calculate your Four Pillars of Destiny chart.
+      </p>
+      <p className="tagline tagline-secondary">
+        Yours, or someone else&apos;s. Go ahead and save a chart for your entire family, a partner,
+        or anyone in your life.
       </p>
 
       <form onSubmit={onSubmit} className="birth-form">

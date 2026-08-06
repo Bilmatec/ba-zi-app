@@ -43,6 +43,43 @@ h2,
   letter-spacing: 0.01em;
 }
 
+.feedback-link {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.feedback-link:hover {
+  color: var(--ember);
+}
+
+/* Post-unlock feedback prompts: one above the reading, one closing it. */
+.feedback-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid #eadfb9;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  background: #fffdf4;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.feedback-banner .feedback-link {
+  white-space: nowrap;
+}
+
+/* The closing prompt ends the section, so it needs breathing room above it
+   rather than below. */
+.feedback-banner:last-child {
+  margin: 1.75rem 0 0;
+}
+
 /* --- Hero --- */
 
 .hero {
@@ -81,6 +118,42 @@ h2,
   padding: 3px 10px;
   border-radius: 6px;
   margin-bottom: 12px;
+}
+
+/* The eyebrow's origin tooltip reuses the .info-tip pattern from the form, but
+   that was built for a light background. On the navy hero it needs its own
+   treatment:
+   - Selectors are hero-scoped so they outrank the base .info-tip:hover/:focus
+     colours defined later in this file (which would turn the icon navy —
+     invisible against the navy hero).
+   - Muting uses a translucent colour, not opacity: opacity on the parent would
+     make the bubble itself see-through.
+   - The bubble opens downward, because .hero clips overflow and there is no
+     room above the eyebrow for it. */
+.eyebrow-row {
+  margin-bottom: 12px;
+}
+
+.eyebrow-row .eyebrow {
+  margin-bottom: 0;
+}
+
+.hero .info-tip-hero {
+  color: rgba(247, 245, 239, 0.7);
+}
+
+.hero .info-tip-hero:hover,
+.hero .info-tip-hero:focus,
+.hero .info-tip-hero:focus-within {
+  color: var(--paper);
+}
+
+.hero .info-tip-hero .info-tip-bubble {
+  bottom: auto;
+  top: calc(100% + 8px);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
 .hero h1 {
@@ -456,6 +529,14 @@ h2,
 .tagline {
   color: #555;
   margin-top: 0;
+}
+
+/* Sits under the main tagline — a step down the scale so it reads as a note
+   rather than competing with it. */
+.tagline-secondary {
+  margin-top: -0.4rem;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* --- Form --- */
@@ -966,9 +1047,30 @@ h2,
   margin-bottom: 0.4rem;
 }
 
+/* The life-domain label sits on its own line under the position name. */
 .tengod-pos em {
+  display: block;
   font-style: normal;
+  font-size: 0.78rem;
   color: var(--gold);
+  margin-top: 0.1rem;
+}
+
+/* The day stem's row: it is the day master (the reader), not a Ten God, so it
+   gets the same highlight treatment as the Day Master box in the free chart.
+   Scoped under .tengod-list li to outrank that rule's background/border. */
+.tengod-list li.tengod-daymaster {
+  background: #fffbe6;
+  border-color: var(--navy);
+}
+
+.tengod-daymaster .tengod-name {
+  color: var(--ember);
+}
+
+.tengod-daymaster .tengod-pos,
+.tengod-daymaster .tengod-stem {
+  color: var(--ink);
 }
 
 .hidden-stems {

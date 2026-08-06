@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { ChartResult } from '../lib/bazi/calculate'
 import type { LuckTimeline } from '../lib/bazi/luck'
@@ -17,6 +17,29 @@ import { interpretChart, roleOf, ELEMENTS, type Strength } from '../lib/bazi/int
 import { STEMS, BRANCHES, type Element } from '../lib/bazi/data'
 import { annualReport, clashPartner, harmPartner, type AnnualReport } from '../lib/bazi/annual'
 import { isUnlocked, unlockDetailed } from '../lib/unlock'
+
+// --- Feedback prompt (temporary, for the test-stage feedback round) ---------
+// Swap this single value if the questionnaire ever moves. To retire the whole
+// feature later, delete this constant, the FeedbackBanner component below, and
+// its two uses in the unlocked branch — nothing else depends on it.
+const FEEDBACK_FORM_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSc2KOinQ1bizUMfi_-dqG7f8yY0Zns0HtMUirtdGifK9AcLsQ/viewform'
+
+function FeedbackBanner({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="feedback-banner">
+      <span>{children}</span>
+      <a
+        className="feedback-link"
+        href={FEEDBACK_FORM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Give feedback →
+      </a>
+    </div>
+  )
+}
 
 const ELEMENT_COLORS: Record<Element, string> = {
   Wood: '#3e7c4f',
@@ -474,24 +497,46 @@ export default function DetailedReading({
         repetition is part of the reading. These roles come from your birth chart, so they are
         lifelong — they do not change as the decades turn. Where a role sits matters too: the year
         position speaks to family and your standing in the world, the month to work and career,
-        the day to you and your closest partner, and the hour to children and the road ahead. The
-        full cast, role by role:
+        the day to you and your closest partner, and the hour to children and the road ahead. One
+        position takes no role: the day stem is the day master itself — you — so the list marks it
+        as the reference point instead. The full cast, role by role:
       </p>
       <ul className="tengod-list">
         {detail.tenGods.map((t, i) => (
-          <li key={i}>
-            <span className="tengod-pos">
-              {t.position}
-              <em> · {DOMAIN_SHORT[t.position.split(' ')[0]]}</em>
-            </span>
-            <span className="tengod-stem">
-              {t.stem.chinese} {t.stem.pinyin}
-            </span>
-            <span className="tengod-name">
-              {t.god.english} <em>({t.god.chinese})</em>
-            </span>
-            <span className="tengod-meaning">{t.god.meaning}</span>
-          </li>
+          <Fragment key={i}>
+            {/* The day stem takes no Ten God role — it IS the day master, the
+                reference point. Without this explicit row, the list has a
+                visible one-beat gap that reads as a bug. */}
+            {t.position.startsWith('Day branch') && (
+              <li className="tengod-daymaster">
+                <span className="tengod-pos">
+                  Day stem
+                  <em>{DOMAIN_SHORT['Day']}</em>
+                </span>
+                <span className="tengod-stem">
+                  {dm.chinese} {dm.pinyin}
+                </span>
+                <span className="tengod-name">Your Day Master</span>
+                <span className="tengod-meaning">
+                  this is you — the reference point every other role here is measured against, so
+                  it takes no role itself
+                </span>
+              </li>
+            )}
+            <li>
+              <span className="tengod-pos">
+                {t.position}
+                <em>{DOMAIN_SHORT[t.position.split(' ')[0]]}</em>
+              </span>
+              <span className="tengod-stem">
+                {t.stem.chinese} {t.stem.pinyin}
+              </span>
+              <span className="tengod-name">
+                {t.god.english} <em>({t.god.chinese})</em>
+              </span>
+              <span className="tengod-meaning">{t.god.meaning}</span>
+            </li>
+          </Fragment>
         ))}
       </ul>
 
@@ -533,7 +578,21 @@ export default function DetailedReading({
   return (
     <section className="detail">
       {unlocked ? (
-        content
+        <>
+          {/* Both prompts are only for people who have actually unlocked — the
+              locked branch renders the same `content` behind a blur, so these
+              sit outside it. One greets the unlock, one catches people at the
+              end of a long read, where they'd otherwise have to scroll back up. */}
+          <FeedbackBanner>
+            Thanks for unlocking the detailed reading — do you have 3 minutes to tell me what you
+            thought?
+          </FeedbackBanner>
+          {content}
+          <FeedbackBanner>
+            That&apos;s your reading in full. If you have 3 minutes, I&apos;d like to know what you
+            made of it — what landed, and what didn&apos;t.
+          </FeedbackBanner>
+        </>
       ) : (
         <div className="paywall">
           <div className="paywall-blur" aria-hidden="true">
