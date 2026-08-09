@@ -579,6 +579,17 @@ h2,
   font-weight: 400;
 }
 
+/* A disabled field (the birth time, once "I don't know my birth time" is
+   ticked) must look switched off. Browsers hide the time-picker icon on
+   disabled inputs, so without this the field looks identical to a live one
+   and the missing clock reads as a fault rather than as "not needed". */
+.birth-form input:disabled {
+  background: #eeece6;
+  color: var(--muted);
+  border-color: #d5d1c6;
+  cursor: not-allowed;
+}
+
 .place-field {
   position: relative;
 }
